@@ -7,3 +7,4 @@ Processing from fastq to uncollapsed bed is done with clip-preprocess, followed 
 Bedgraphs are then made by running bed_to_wig.py, which also makes the normalized bedgraphs (coverage per million reads).
 
 Scripts are in analysis/.
+Most output is in peaks-by-permutations/.
