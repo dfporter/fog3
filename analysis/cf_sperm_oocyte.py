@@ -1,6 +1,5 @@
 import pandas
 import sys
-import config
 import matplotlib.pyplot as plt
 import numpy as np
 import re
@@ -21,9 +20,8 @@ def read_programs(lib):
     return oogenic, spermatogenic
 
 
-def get_data(clip_deseq_fname, peaks_fname):
+def get_data(clip_fname, peaks_fname, lib):
     print locals()
-    lib = config.config()
     # Get maps.
     wb_id_to_gene_name = wb_to_public_name(lib['gtf_raw'])
     gene_name_to_wb_id = collections.defaultdict(list)
@@ -38,14 +36,6 @@ def get_data(clip_deseq_fname, peaks_fname):
     for row in gl_deseq:
         gl_by_gene[row['WormBase ID (WS240)']] = row
     # Get Clip.
-    clip = pandas.read_csv(clip_deseq_fname, sep='\t')
-    clip = clip.to_dict('records')
-    clip_by_gene = {}
-    for row in clip:
-        if row['baseMean'] != 0:
-            if 'gene_name' not in row:
-                print row
-            clip_by_gene[row['gene_name']] = row
     peaks = pandas.read_csv(peaks_fname, sep='\t')
     peaks = peaks.to_dict('records')
     peaks_by_gene = collections.defaultdict(dict)
@@ -55,55 +45,40 @@ def get_data(clip_deseq_fname, peaks_fname):
             continue
         peaks_by_gene[row['gene_id']] = row
         peaks_by_gene[row['gene_id']]['height'] = float(row['height'])
-    return clip_by_gene, gl_by_gene, peaks_by_gene
+    return gl_by_gene, peaks_by_gene
 
 
-def cf_deseq_w_sperm_oocyte_expression(clip_deseq_fname, peaks_fname):
-    lib = config.config()
+def cf_deseq_w_sperm_oocyte_expression(clip_deseq_fname, peaks_fname, lib):
     # Build combined table.
-    clip_by_gene, gl_by_gene, peaks = get_data(clip_deseq_fname, peaks_fname)
-    understood_genes = set(gl_by_gene.keys()) & set(clip_by_gene.keys())
-    clip_enriched = collections.defaultdict()
-    for gene in clip_by_gene:
-        if clip_by_gene[gene]['log2FoldChange'] >= 1:
-            clip_enriched[gene] = clip_by_gene[gene]
-    understood_genes_enriched = set(gl_by_gene.keys()) & set(clip_enriched.keys())
-    understood_genes_peaks = set(gl_by_gene.keys()) & set(peaks.keys())
+    gl_by_gene, peaks = get_data(
+        clip_deseq_fname, peaks_fname, lib)
+    understood_genes = set(gl_by_gene.keys()) & set(peaks.keys())
     print """
     Genes in Noble et al. germline expression dataset (DESeq2) {i}
-    Genes in FOG-3 iCLIP (DESeq2): {o} (only enriched {oe})
-    Genes in both FOG-3 DESeq2 and Noble datasets: {b} (only CLIP-enriched {bo})
-    Genes in CLIP (DESeq2) but not in germline: {ni} (only CLIP-enriched {nio})
     Genes in FOG-3 iCLIP (called peaks): {pgs}
     Genes in both FOG-3 clip peaks and Noble datasets: {bpgs}
     Genes in FOG-3 clip peaks and not in germline: {npgs}
     """.format(i=len(gl_by_gene.keys()),
-               o=len(clip_by_gene.keys()), oe=len(clip_enriched),
-               b=len(list(understood_genes)), bo=len(understood_genes_enriched),
-               ni=len(set(clip_by_gene.keys()) - understood_genes),
-               nio=len(set(clip_enriched) - understood_genes_enriched),
                pgs=len(peaks),
-               bpgs=len(list(understood_genes_peaks)),
-               npgs=len(set(peaks.keys()) - understood_genes_peaks)
-               )
-    split_by_noble_cat(clip_by_gene, gl_by_gene, peaks)
-    table = {}
-    for gene in understood_genes:
-        rnaseq = gl_by_gene[gene]['Fold change (of normalized reads)']
-        if rnaseq == 'Infinite':
-            rnaseq = 1e3
-        clip_val = np.log2(float(clip_by_gene[gene]['baseMean']))
-        rnaseq = np.log2(float(rnaseq))
+               bpgs=len(list(understood_genes)),
+               npgs=len(set(peaks.keys()) - understood_genes)
+    )
+    split_by_noble_cat(gl_by_gene, peaks)
+#    table = {}
+#    for gene in understood_genes:
+#        rnaseq = gl_by_gene[gene]['Fold change (of normalized reads)']
+#        if rnaseq == 'Infinite':
+#            rnaseq = 1e3
+#        clip_val = np.log2(float(clip_by_gene[gene]['baseMean']))
+#        rnaseq = np.log2(float(rnaseq))
         #if float(clip_by_gene[gene]['pvalue']) < 0.2:
-        table[gene] = [clip_val, rnaseq]
-    as_arr = table.values()
+#        table[gene] = [clip_val, rnaseq]
+#    as_arr = table.values()
     #print table.values()
 #    make_fig(table, output_filename=lib['figs'] + '/cf_w_sperm_oocyte.pdf')
 
 
-def split_by_noble_cat(clip, gl, peaks):
-    assert isinstance(clip, dict)
-    assert isinstance(gl, dict)
+def split_by_noble_cat(gl, peaks):
     by_cat = collections.defaultdict(dict)
     for gene in gl:
         cat = gl[gene]['Gene expression']
@@ -141,17 +116,6 @@ def split_by_noble_cat(clip, gl, peaks):
                 fold_change[i] = 1.e3
         fold_change = [float(x) for x in fold_change]
         fold_change = np.array(fold_change)
-        exp_in_clip = [
-            float(clip[gene]['log2FoldChange']) for gene in by_cat[cat] if (
-                (gene in clip) and (clip[gene]['baseMean'] > 10.))
-        ]
-        basemean_in_clip = [
-            float(clip[gene]['baseMean']) for gene in by_cat[cat] if gene in clip
-        ]
-        basemean_in_clip = [
-            float(clip[gene]['baseMean']) for gene in by_cat[cat] if (
-                (gene in clip) and (clip[gene]['baseMean'] > 10.))
-        ]
         peak_heights = [
             float(peaks[gene]['height']) for gene in by_cat[cat] if gene in peaks
         ]
@@ -189,8 +153,6 @@ def split_by_noble_cat(clip, gl, peaks):
         {c}: Median expression in fog-2 worms {fog2}
         {c}: Median fold change spermatogenic/oogenic {q}
 \t\t({percgl}% of germline genes)
-        {c}: Median iCLIP FOG-3/no-antibody control {cr}
-        {c}: Median expression FOG-3 iCLIP {ri}
         {c}: Median FOG-3 iCLIP height: {peaksh}
         {c}: Number of FOG-3 iCLIP targets: {numpeaks}\n\t\t({perc}% of iCLIP targets)\n\t\t({perc_in_gon}% of iCLIP targets in germline database)
         {c}: Significance of overlap with FOG-3 iCLIP peaks within gonad-expressed genes (Fisher): {pval}
@@ -198,9 +160,7 @@ def split_by_noble_cat(clip, gl, peaks):
             c=cat, n=np.median(exp_in_fem3),
             fog2=np.median(exp_in_fog2),
             q=np.median(fold_change),
-            cr=np.median(exp_in_clip),
             percgl="%.3f" % float(100 * frac_gl),
-            ri=np.median(basemean_in_clip),
             peaksh=np.median(peak_heights),
             numpeaks=len(lclip_peaks),
             perc="%.3f" % float(100 * frac_clip),
@@ -274,10 +234,8 @@ def pie_of_categories(vals, labels, out_filename='figs/pie.pdf'):
     plt.clf()
     plt.close()
 
-def run(deseq_fname='/groups/Kimble/Common/fog_iCLIP/pre_calls/fog_clip_deseq.txt',
+def run(lib=None, deseq_fname='/groups/Kimble/Common/fog_iCLIP/pre_calls/fog_clip_deseq.txt',
         peaks_fname='/groups/Kimble/Common/fog_iCLIP/calls/for_comp/both_ratios_and_deseq.txt'):
-    import config
-    lib = config.config()
     oogenic, spermatogenic = read_programs(lib)
     peaks_df = pandas.read_csv(peaks_fname, sep='\t')
     cat_oo = collections.defaultdict(set)
@@ -310,11 +268,14 @@ def run(deseq_fname='/groups/Kimble/Common/fog_iCLIP/pre_calls/fog_clip_deseq.tx
 
     cf_deseq_w_sperm_oocyte_expression(
         deseq_fname,
-        peaks_fname)
+        peaks_fname, lib)
+    print "end of run."
         #'/groups/Kimble/Common/fog_iCLIP/pre_calls/counts/')
     #cf_w_sperm_oocyte_expression(peaks_fname)
 
 
 if __name__ == '__main__':
     peaks_fname = sys.argv[1]
-    run(peaks_fname=peaks_fname)
+    import config
+    lib = config.config()
+    run(peaks_fname=peaks_fname, lib=lib)

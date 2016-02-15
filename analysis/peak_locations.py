@@ -9,7 +9,6 @@ from scipy.optimize import minimize_scalar
 import sys
 import matplotlib
 import os
-import config
 import argparse
 
 
@@ -153,7 +152,9 @@ def pie_chart_of_biotype(peaks, gtf_sep_cols,
                             'ncRNA': total_ncRNA}
     make_a_pie_chart(simplified_locations, label=label+'_coding_vs_nc', subdir=subdir)
 
-def run(gtf_sep_cols, top_level_dir, already_located=False):
+def run(gtf_sep_cols, lib, peaks_dir, already_located=False):
+    gtf_sep_cols = pandas.read_csv(lib['gtf'], sep='\t')
+    top_level_dir = peaks_dir + '/'
     peaks = {}
     for filename in glob.glob(top_level_dir + '/*.txt'):
         print "\tReading peaks from {p}".format(p=filename)
@@ -199,8 +200,12 @@ if __name__ == '__main__':
         '-o', '--output', default='annotated_peaks.txt',
         help='''Output filename.'''
     )
+    parser.add_argument(
+        '-c', '--config',
+        help='''Directory holding config.py file.'''
+    )
     args = parser.parse_args()
+    sys.path.insert(0, args.config)
+    import config
     lib = config.config()
-    gtf_sep_cols = pandas.read_csv(lib['gtf'], sep='\t')
-    top_level_dir = args.peaks_dir + '/'
-    run(gtf_sep_cols, top_level_dir)
+    run(gtf_sep_cols, args.peaks_dir, lib)

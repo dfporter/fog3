@@ -1,5 +1,4 @@
 import re
-import config
 import glob
 import sys
 import os

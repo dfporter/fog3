@@ -21,6 +21,7 @@ import write_fastas
 sys.path.insert(0,
     '/groups/Kimble/Common/fog_iCLIP/calls/peaks-by-permutations/')
 import find_peaks_by_permutations
+import annotate_peaks
 del sys.path[0]
 
 def read_collapsed_bed(bed_file):
@@ -234,10 +235,19 @@ if __name__ == '__main__':
     args = get_args.get_args()
     sys.path.insert(0, args.config)
     import config
+    print 'config.__file__='
+    print config.__file__
     lib = config.config()
     del sys.path[0]
+    if not os.path.exists('figs/'): os.system('mkdir figs/')
+    print lib['spermatogenic_program']
     reads_dir = lib['read_beds']
     peaks = pandas.read_csv(args.peaks, sep='\t')
+    if 'location' not in peaks.columns:
+        annotate_peaks.run(lib, args.peaks)
+    if not os.path.exists('counts/'):
+        assign_to_gene.run(use_this_lib=lib)
+        os.system('cp combined_counts.txt counts/')
     if 'gene_id' in peaks.columns:
         target_wb_ids = set(peaks['gene_id'].tolist())
         if 'gene' not in peaks.columns:
@@ -257,9 +267,10 @@ if __name__ == '__main__':
             )
             cf_fog1_rip.run(args.peaks, gtf_sep_cols, lib=lib)
             cf_fog3_rip.run(args.peaks, gtf_sep_cols, lib=lib)
-            cf_sperm_oocyte.run(peaks_fname=args.peaks,
+            cf_sperm_oocyte.run(lib=lib, peaks_fname=args.peaks,
                                 deseq_fname='/groups/Kimble/Common/fog_iCLIP/pre_calls/fog_clip_deseq.txt')
-            peak_locations.run(gtf_sep_cols, os.path.dirname(args.peaks),
+            peak_locations.run(gtf_sep_cols,
+                               lib, os.path.dirname(args.peaks),
                                already_located=True)
             write_fastas.write_fastas(args.peaks)
             # create_bedgraphs_from_bed_files(
@@ -285,6 +296,7 @@ if __name__ == '__main__':
                 reload(cf_fog1_rip)
                 reload(cf_fog3_rip)
                 reload(cf_sperm_oocyte)
+                reload(annotate_peaks)
                 print "Successfully recompiled."
                 reloaded = True
             except:
