@@ -105,7 +105,7 @@ def split_by_noble_cat(gl, peaks):
                        out_filename='figs/pie_of_gamete_categories_in_peaks.pdf')
     for cat in ['Spermatogenic', 'Oogenic', 'Gender Neutral']:
         exp_in_fem3 = [
-            float(by_cat[cat][gene]['Expression in fem-3 gonads (normalized reads)']) for gene in by_cat[cat]]
+            float(by_cat[cat][gene]['Expression in fem-3 gonads bash(normalized reads)']) for gene in by_cat[cat]]
         exp_in_fog2 = [
             float(by_cat[cat][gene]['Expression in fog-2 gonads (normalized reads)']) for gene in by_cat[cat]]
         fold_change = [
@@ -234,6 +234,7 @@ def pie_of_categories(vals, labels, out_filename='figs/pie.pdf'):
     plt.clf()
     plt.close()
 
+
 def run(lib=None, deseq_fname='/groups/Kimble/Common/fog_iCLIP/pre_calls/fog_clip_deseq.txt',
         peaks_fname='/groups/Kimble/Common/fog_iCLIP/calls/for_comp/both_ratios_and_deseq.txt'):
     oogenic, spermatogenic = read_programs(lib)
@@ -258,7 +259,6 @@ def run(lib=None, deseq_fname='/groups/Kimble/Common/fog_iCLIP/pre_calls/fog_cli
     oo_total = sum([float(len(cat_oo[x])) for x in cat_oo])
     sp_total = sum([float(len(cat_sp[x])) for x in cat_sp])
     cats_total = sum([float(len(cats[x])) for x in cats])
-
     for val in cat_oo:
         cat_oo[val] = 100 * len(list(cat_oo[val]))/oo_total
     for val in cat_sp:

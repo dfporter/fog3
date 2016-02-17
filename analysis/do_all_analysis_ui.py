@@ -1,15 +1,19 @@
+"""
+do_all_analysis_ui.py: Calls several analysis scripts.
+Currently, this uses a hard-coded path to a peaks-by-permutations dir.
+"""
 import re
 import glob
 import sys
 import argparse
-sys.path.insert(0,
-    '/groups/Kimble/Common/fog_iCLIP/calls/analysis/src/')
+import numpy as np
+import collections
+#sys.path.insert(0,
+#    '/groups/Kimble/Common/fog_iCLIP/calls/analysis/src/')
 import traceback
-# import rip_comparison
 import pandas
 import os
 import HTSeq
-
 import clean_up_peaks_file
 import get_args
 import cf_fog1_rip
@@ -22,6 +26,8 @@ sys.path.insert(0,
     '/groups/Kimble/Common/fog_iCLIP/calls/peaks-by-permutations/')
 import find_peaks_by_permutations
 import annotate_peaks
+import assign_to_genes
+# print sys.modules.keys()
 del sys.path[0]
 
 def read_collapsed_bed(bed_file):
@@ -53,7 +59,6 @@ def create_bedgraphs_from_bed_files(
         if not os.path.exists(fname): have_all = False
     if have_all and not overwrite:
         return
-    print "Creating bedgraphs from bed files..."
     control_beds, exp_beds = get_bed_filenames(bed_folder, lib)
     ga = {}
     ga['control'] = HTSeq.GenomicArray('auto', stranded=True)
@@ -98,7 +103,6 @@ def get_bed_filenames(bed_folder, lib):
     control_beds = []
     exp_beds = []
     name = ('control_bed', 1)
-    print lib
     while ''.join([str(x) for x in name]) in lib:
         control_beds.append(bed_folder + '/' + lib[''.join([str(x) for x in name])])
         name = (name[0], name[1] + 1)
@@ -106,8 +110,6 @@ def get_bed_filenames(bed_folder, lib):
     while ''.join([str(x) for x in name]) in lib:
         exp_beds.append(bed_folder + '/' + lib[''.join([str(x) for x in name])])
         name = (name[0], name[1] + 1)
-    print control_beds
-    print exp_beds
     return control_beds, exp_beds
 
 
@@ -156,7 +158,7 @@ def hist_of_peaks_per_gene(peaks_filename):
         num_of_peaks[gene] = len(peaks[peaks['gene_name']==gene])
     ranked = sorted(num_of_peaks.keys(), key=lambda x: num_of_peaks[x])
     if not os.path.exists('tables'): os.system('mkdir tables/')
-    tablename = 'tables/{b}/'.format(b=os.path.dirname(peaks_filename))
+    tablename = 'tables/'
     if not os.path.exists(tablename):
         os.system('mkdir ' + tablename)
     with open(tablename + 'peaks_per_gene_{a}'.format(
@@ -173,21 +175,16 @@ def hist_of_peaks_per_gene(peaks_filename):
     fig, ax1 = plt.subplots(1, 1)
     bins_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     num, bins, p =ax1.hist(num_of_peaks.values(), bins=bins_list, color='black', )
-    print num, bins
-    print "total: {a}. 1 peak {b}. >1 peak {v}. % with more than one peak {zz}".format(
+    print(num, bins)
+    print("total: {a}. 1 peak {b}. >1 peak {v}. % with more than one peak {zz}".format(
         a=sum(num), b=num[0], v=sum(num[1:]), zz=float(sum(num[1:]))/float(sum(num))
-    )
+    ))
     # ax1.set_xlim(1, 12)
     ax1.set_ylabel('Number of genes')
     ax1.set_xlabel('Number of peaks')
     ax1.set_xlim([min(bins_list), max(bins_list)])
     ax1.set_xticks([x + 0.5 for x in bins_list])
     ax1.set_xticklabels([str(x) for x in bins_list])
-    # ax2.set_xlim(5, 12)
-    # ax2.set_ylim(0, 50)
-    # ax2.set_ylabel('Number of genes')
-    # ax2.set_xlabel('Number of peaks')
-    # ax2.hist(num_of_peaks.values(), color='black')
     plt.savefig('figs/peaks_per_gene_hist.pdf', format='pdf')
     plt.clf()
     plt.close()
@@ -210,7 +207,7 @@ def report_location(peaks_fname):
         x for x in gene_to_location if x[1] in ["5'UTR", "3'UTR", "CDS"]]
     non_mrna_location = [
         x for x in gene_to_location if x[1] not in ["5'UTR", "3'UTR", "CDS"]]
-    print """
+    print("""
 Location of peaks:
 Peaks: {n} by len(.index), {nn} by len(genes)
 Locations:
@@ -229,24 +226,54 @@ Locations:
     qq="%.2f" % float(
         100. * float(sum_of_mrna_locs)/float(ncrna + sum_of_mrna_locs)),
     allsum=ncrna + sum_of_mrna_locs,
+    ))
+
+    
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--peaks', help="""Input peaks file (Required).""")
+    parser.add_argument('-c', '--config', help="""Folder of config.py.""")
+    parser.add_argument(
+        '-v', '--no_ui',
+        help="""Do not wait for user input (default: false).""",
+        action='store_true', default=False)
+    args = parser.parse_args()
+    return args
+
+
+def run(lib, args, target_wb_ids, gtf_sep_cols):
+    replicate_venns.run(
+        lib['clusters_dir'], lib['permutation_peaks_dir'], lib=lib,
+        only_use_these_targets=target_wb_ids
     )
+    cf_fog1_rip.run(args.peaks, gtf_sep_cols, lib=lib)
+    cf_fog3_rip.run(args.peaks, gtf_sep_cols, lib=lib)
+    cf_sperm_oocyte.run(lib=lib, peaks_fname=args.peaks,
+                        deseq_fname='/groups/Kimble/Common/fog_iCLIP/pre_calls/fog_clip_deseq.txt')
+    peak_locations.run(gtf_sep_cols,
+                       lib, os.path.dirname(args.peaks),
+                       already_located=True)
+    write_fastas.write_fastas(args.peaks)
+
+
+
 
 if __name__ == '__main__':
-    args = get_args.get_args()
+    args = get_args()
     sys.path.insert(0, args.config)
     import config
-    print 'config.__file__='
-    print config.__file__
     lib = config.config()
     del sys.path[0]
     if not os.path.exists('figs/'): os.system('mkdir figs/')
-    print lib['spermatogenic_program']
+#    rename('counts/')
+#    deseq_volcano('peak_stats.txt', args.peaks, lib)
+#    sys.exit()
     reads_dir = lib['read_beds']
     peaks = pandas.read_csv(args.peaks, sep='\t')
     if 'location' not in peaks.columns:
         annotate_peaks.run(lib, args.peaks)
     if not os.path.exists('counts/'):
-        assign_to_gene.run(use_this_lib=lib)
+        assign_to_genes.run(use_this_lib=lib)
         os.system('cp combined_counts.txt counts/')
     if 'gene_id' in peaks.columns:
         target_wb_ids = set(peaks['gene_id'].tolist())
@@ -255,35 +282,20 @@ if __name__ == '__main__':
     elif 'gene' in peaks.columns:  target_wb_ids = set(peaks['gene'].tolist())
     else: raise Exception
     hist_of_peaks_per_gene(args.peaks)
-    print report_location(args.peaks)
-    # peaks_l = peaks.to_dict('records')
+    print(report_location(args.peaks))
     gtf_sep_cols = pandas.read_csv(lib['gtf'], sep='\t')
-    # add_reads_in_peak(args, lib)
+    if args.no_ui:
+        run(lib, args, target_wb_ids, gtf_sep_cols)
+        print("Successfully finished.")
+        sys.exit()
     while True:
         try:
-            replicate_venns.run(
-                lib['clusters_dir'], lib['permutation_peaks_dir'], lib=lib,
-                only_use_these_targets=target_wb_ids
-            )
-            cf_fog1_rip.run(args.peaks, gtf_sep_cols, lib=lib)
-            cf_fog3_rip.run(args.peaks, gtf_sep_cols, lib=lib)
-            cf_sperm_oocyte.run(lib=lib, peaks_fname=args.peaks,
-                                deseq_fname='/groups/Kimble/Common/fog_iCLIP/pre_calls/fog_clip_deseq.txt')
-            peak_locations.run(gtf_sep_cols,
-                               lib, os.path.dirname(args.peaks),
-                               already_located=True)
-            write_fastas.write_fastas(args.peaks)
-            # create_bedgraphs_from_bed_files(
-            #    overwrite=True,
-            #    bed_folder=args.bed,
-            #    bedgraph_folder=lib['bedgraphs_folder'],
-            #    lib=lib)
-            #
-            print "Successfully finished."
+            run(lib, args, target_wb_ids, gtf_sep_cols)
+            print("Successfully finished.")
         except:
-            print traceback.format_exc()
-            print "Failed."
-        print "Hit enter to reload, CTRL-C to close."
+            print(traceback.format_exc())
+            print("Failed.")
+        print("Hit enter to reload, CTRL-C to close.")
         sys.stdin.readline()
         reloaded = False
         while not reloaded:
@@ -297,10 +309,10 @@ if __name__ == '__main__':
                 reload(cf_fog3_rip)
                 reload(cf_sperm_oocyte)
                 reload(annotate_peaks)
-                print "Successfully recompiled."
+                print("Successfully recompiled.")
                 reloaded = True
             except:
-                print "Crash when trying to compile."
-                print traceback.format_exc()
-            print "Hit enter to re-run the script, CTRL-C to close."
+                print("Crash when trying to compile.")
+                print(traceback.format_exc())
+            print("Hit enter to re-run the script, CTRL-C to close.")
             sys.stdin.readline()
