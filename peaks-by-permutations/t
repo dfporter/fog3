@@ -1,0 +1,11 @@
+..//bed_collapsed/
+Traceback (most recent call last):
+  File "find_peaks_by_permutations.py", line 87, in <module>
+    args=args, lib=lib)
+  File "/groups/Kimble/Common/fog_iCLIP/peaks-by-permutations/get_bed_files.py", line 10, in get_bed_files
+    for feature in gtf:
+  File "/usr/lib64/python2.6/site-packages/HTSeq-0.5.4p3-py2.6-linux-x86_64.egg/HTSeq/__init__.py", line 210, in __iter__
+    for line in FileOrSequence.__iter__( self ):
+  File "/usr/lib64/python2.6/site-packages/HTSeq-0.5.4p3-py2.6-linux-x86_64.egg/HTSeq/__init__.py", line 51, in __iter__
+    lines = open( self.fos )
+IOError: [Errno 2] No such file or directory: '..//lib//Caenorhabditis_elegans.WBcel235.78.noheader.gtf'
