@@ -33,13 +33,16 @@ class stats(object):
                 100*float(self.stats[numer][j])/float(self.stats[denom][j])
 
     def map_to_two_places(self, dirname):
-        self.stats['Number of alignments mapping to exactly two places'] = \
+        self.stats['Number of reads mapping to exactly two places'] = \
                 dict(self.sam_sizes_in_dir(glob.glob(dirname + '/*sam')))
-        self.as_perc('Number of alignments mapping to exactly two places',
+        self.stats['Number of reads mapping to exactly two places'] = \
+                           dict([(x[0], x[1]/2) for x in \
+            self.stats['Number of reads mapping to exactly two places'].items()])
+        self.as_perc('Number of reads mapping to exactly two places',
                 'Number of reads')
 
     def total_reads_in_sam_files(self, dirname):
-        self.stats['Number of alignments mapped or unmapped by STAR'] = \
+        self.stats['Number of alignments (>=1 per read) mapped or unmapped by STAR'] = \
                 dict(self.sam_sizes_in_dir(glob.glob(dirname + '/*sam')))
 
     def unmapped(self, dirname):
@@ -133,7 +136,6 @@ class statsWithPeaksByPermutations(stats):
                 set(df['gene_id'].tolist()))
 
     def read_peaks_dir(self, dirname):
-        print 'asdfasdf'
         self.stats['Peaks, final'] = {}
         self.stats['Genes, final'] = {}
         for fname in glob.glob(dirname + '/*txt'):
@@ -142,7 +144,7 @@ class statsWithPeaksByPermutations(stats):
             self.stats['Peaks, final'][f] = len(df.index)
             self.stats['Genes, final'][f] = len(
                 set(df['gene_id'].tolist()))
-            print self.stats
+
     
 def run(args):
     top = 'v2/'
@@ -165,8 +167,38 @@ def run(args):
     s.collapsed_reads_no_rrna(os.path.join(top, 'bed_collapsed/no_rrna/'))
     s.total_reads_in_sam_files(os.path.join(top, 'unfiltered_star_sams_output'))
     print s
+    writer = pandas.ExcelWriter('stats.xls')
     s.as_dataframe().to_csv('stats.txt', sep='\t', index=True)
+    columns = [
 
+"Number of reads",
+"Number of alignments (>=1 per read) mapped or unmapped by STAR",
+"Number of reads unmapped by STAR",
+"Number of reads unmapped by STAR (%)",
+"Number of reads mapping to exactly two places",
+"Number of reads mapping to exactly two places (%)",
+"Number of reads mapping uniquely at 20 AS",
+"Number of reads mapping uniquely at 20 AS (%)",
+"Number of reads mapping uniquely before collapsing",
+"Number of reads mapping uniquely before collapsing (%)",
+"Number of rRNA reads mapping uniquely after collapsing duplicates",
+"Number of non-rRNA reads mapping uniquely after collapsing duplicates",
+"Number of non-rRNA reads mapping uniquely after collapsing duplicates (%)",
+"Number of reads mapping uniquely after collapsing duplicates",
+"Number of reads mapping uniquely after collapsing duplicates (%)",
+"Genes, after FDR cutoff",
+"Genes, before FDR cutoff",
+"Genes, final",
+"Peaks, after FDR cutoff",
+"Peaks, before FDR cutoff",
+"Peaks, final",
+        ]
+    s.as_dataframe().to_excel(
+        writer,
+        sheet_name='FOG-3 statistics',
+        columns=columns
+        )
+    writer.save()
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='''File stats.''')
     parser.add_argument('-c', '--config_ini',
