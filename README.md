@@ -51,15 +51,13 @@ Mapping
 |mapping/sams   | Filtered sams - uniquely mapping, 20 AS |
 |mapping/bed_uncollapsed | Uncollapsed bed files made from mapping/sams|
 |mapping/bed_collapsed | Beds collapsed from bed_uncollapsed |
-|permutation_peaks | Peaks called from bedgraph_unnorm/ and bed_collapsed/ |
-|bedgraph_unnorm | Produced from bed_collapsed. Not normalized to dataset size. |
 
 CIMS analysis
 ----
 
 |    Folder     | Description |
 |    ------     | ----------- |
-|cims/cims_tables | Results of cims analysis
+|cims/cims_tables | Results of cims analysis |
 |cims/CIMS      | Zhang lab CIMS scripts with modifications|
 |cims/fasta     | Fasta files from cims analysis |
 |cims/novoaligned | Raw output from novoalign in .novo |
@@ -69,4 +67,16 @@ CIMS analysis
 |cims/mismatch_tags | bed-like, holds read and mutation |
 |cims/mismatches_by_type | mismatch_tags split by ins/del/sub |
 |cims_out | Raw output of CIMS scripts |
+
+There is a cims github repo.
+
+```bash
+# This maps the fastq files and writes nohup commands for read collapsing.
+python cims_master.py -i FOLDER_OF_FASTQ_FILES --lib fog_cims.ini --map
+# Then run the read collapsing.
+# Then do the cims analysis.
+python cims_master.py -i FOLDER_OF_FASTQ_FILES --lib fog_cims.ini --cims
+# Output is in cims_tables/
+```
+
 
