@@ -1,6 +1,8 @@
 FOG-3 iCLIP analysis
 ====
 
+Pre-processing
+----
 The initial fastq zip file and the result of splitting by barcode are not included in the repository, but are currently in pre_calls/fastq/.
 
 Processing from fastq to uncollapsed bed is done with clip-preprocess, followed by collapsing reads (handled with the output from write_commands_for_collapsing.py in order to use multiple CPUs).
@@ -24,4 +26,31 @@ python peaks-by-permutations.py
 
 We will keep track of where the reads have gone in tables/read_stats.xls.
 
+|    Folder     | Description |
+|    ------     | ----------- |
+|mapping        | Fastq files, beds, and sams|
+|mapping/fastq  | Raw fastq   |
+|mapping/temp_clipped | Fastq files ready to be mapped|
+|mapping/sams   | Filtered sams - uniquely mapping, 20 AS |
+|mapping/bed_uncollapsed | Uncollapsed bed files made from mapping/sams|
+|mapping/bed_collapsed | Beds collapsed from bed_uncollapsed |
+|permutation_peaks | Peaks called from bedgraph_unnorm/ and bed_collapsed/ |
+|bedgraph_unnorm | Produced from bed_collapsed. Not normalized to dataset size. |
+
+CIMS analysis
+----
+
+|    Folder     | Description |
+|    ------     | ----------- |
+|cims           | CIMS analysis and novoalign mapping|
+|cims/cims_tables | Results of cims analysis
+|cims/CIMS      | Zhang lab CIMS scripts with modifications|
+|cims/fasta     | Fasta files from cims analysis |
+|cims/novoaligned | Raw output from novoalign in .novo |
+|cims/novo_tags | .novo files in novoaligned converted to .bed|
+|cims/novo_tags_collapse | novo_tags after Zhang collapsing (still bed)|
+|cims/collapsed_reformated | novo_tags_collapse reformated (still bed) for input into CIMS analysis |
+|cims/mismatch_tags | bed-like, holds read and mutation |
+|cims/mismatches_by_type | mismatch_tags split by ins/del/sub |
+|cims_out | Raw output of CIMS scripts |
 
