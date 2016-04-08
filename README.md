@@ -29,6 +29,23 @@ We will keep track of where the reads have gone in tables/read_stats.xls.
 |    Folder     | Description |
 |    ------     | ----------- |
 |mapping        | Fastq files, beds, and sams|
+|cims           | CIMS analysis and novoalign mapping|
+|peaks-by-permutations | Peak calling |
+|fog3analysis | Analyis scripts |
+|analyis | Analysis scripts |
+|fbf_analysis | Analysis scripts ported from FBF |
+|calls | Old peak calling scripts |
+|permutation_peaks | Peaks called from bedgraph_unnorm/ and bed_collapsed/ |
+|bedgraph_unnorm | Produced from bed_collapsed. Not normalized to dataset size. |
+|bedgraph_norm | Bedgraphs normalized to reads/million. |
+|bed_collapsed | A copy of mapping/bed_collapsed |
+|pre_calls | Old pre-processing. |
+|old_analysis_files | Old analysis files. |
+
+Mapping
+----
+|    Folder     | Description |
+|    ------     | ----------- |
 |mapping/fastq  | Raw fastq   |
 |mapping/temp_clipped | Fastq files ready to be mapped|
 |mapping/sams   | Filtered sams - uniquely mapping, 20 AS |
@@ -42,7 +59,6 @@ CIMS analysis
 
 |    Folder     | Description |
 |    ------     | ----------- |
-|cims           | CIMS analysis and novoalign mapping|
 |cims/cims_tables | Results of cims analysis
 |cims/CIMS      | Zhang lab CIMS scripts with modifications|
 |cims/fasta     | Fasta files from cims analysis |
