@@ -42,8 +42,50 @@ We will keep track of where the reads have gone in tables/read_stats.xls.
 |pre_calls | Old pre-processing. |
 |old_analysis_files | Old analysis files. |
 
+
+General analysis
+----
+
+Running find_peaks_by_permutations.py will make a call to peaks_by_pemutations/annotate_peaks.py.
+
+This will load the -c .ini file, and add reads in peaks from lib['bedgraphs_folder'], which will be the unnormalized bedgraphs.
+The added values will represent the max depth in the peak region in absolute read number.
+
+Gender analysis
+----
+
+Three ways to define gender:
+    
+    1. Use definitions from /opt/lib/ortiz/DESeq_genes_in_gonad.txt.
+    2. Use fold changes from /opt/lib/ortiz/DESeq_genes_in_gonad.txt.
+    3. Use the method from Noble et al.:
+        * Read programs from /opt/lib/ortiz/TableS1_oogenic.txt and /opt/lib/ortiz/TableS2_spermatogenic.txt
+        * Count oogenic as those only in oogenic dataset, ect.
+
+In the case of 3., these files have the format:
+    Wormbase ID	Ortiz Gonad	Sperm X	Maternal X	Oocyte X	Program
+WBGene00235362	Not Present	Not Present	Oogenic	Not Present	Oogenic only
+
+It seems quite clear that, on the whole, being a FOG-3 target does not
+ correlate with SP/OO RPKM ratio - they are not enriched in either direction.
+ In addition, SP/OO RPKM ratio does not correlate with FOG-3 peak height.
+ Higher FOG-3 peaks are not more likely to be SP or OO enriched.
+ Overall, the subset of SP or OO expressed RNAs that are FOG-3 targets
+ is largely the set of RNAs that are abundant in both germlines.
+
+The next question is - how does this abundance bias affect the SP/OO
+ program definitions of Noble et al.? To answer this, we have to ask
+ IF we have the observed abundance bias, THEN how likely is a given
+ category size to be observed? So we take the observed range of abundances,
+ and fit a histogram along each axis.
+
+
+On a different note, we could take each gene's (x_sp, y_oo) coordinate,
+ and rotate by 45 degrees.
+
 Mapping
 ----
+
 |    Folder     | Description |
 |    ------     | ----------- |
 |mapping/fastq  | Raw fastq   |
@@ -51,6 +93,18 @@ Mapping
 |mapping/sams   | Filtered sams - uniquely mapping, 20 AS |
 |mapping/bed_uncollapsed | Uncollapsed bed files made from mapping/sams|
 |mapping/bed_collapsed | Beds collapsed from bed_uncollapsed |
+
+Mapping statistics are obtained with:
+
+```bash
+python file_stats.py -c config.ini -o fog3_file_stats
+
+# Or more fully, I put symlinks to the mapping folder in the cims folder
+# so this script can find everything related to mapping, both for STAR
+# and novoalign, in the cims/ folder.
+dfporter at kimble-1 in /groups/Kimble/Common/fog_iCLIP/stats on master* b8caca3
+$ python file_stats.py -i ../cims -b ../../fbf_celltype/cims/ -o fog3_file_stats
+```
 
 CIMS analysis
 ----
@@ -86,4 +140,5 @@ python dimers.py FASTA_FILE
 pyhton pos_vs_motif.py -i cims_tables/ -m A_MOTIF
 # Outputs a line plot and some seqlogos.
 ```
+
 

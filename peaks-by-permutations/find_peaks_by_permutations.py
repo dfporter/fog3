@@ -13,11 +13,11 @@ INPUT:
 Config file.
 
 OUTPUT:
-Outputs to lib['clusters_dir'] from the config.ini file.
+Outputs to lib['clusters_dir'] from the .ini config file.
 Outputs called peaks to lib['permutation_peaks'].
 
 Run as;
-python find_peaks_by_permutations.py -c <directory with config.py>
+python find_peaks_by_permutations.py -c config.ini
 
 From config.ini, this uses the following variables:
 exp_bed1, ...
@@ -96,6 +96,8 @@ if __name__ == '__main__':
             args.peaks = 'permutation_peaks/combined_exp.txt'
             os.system('python annotate_peaks.py -c {a} -p permutation_peaks/combined_exp.txt'.format(
                 a=args.config_ini))
+            os.system('python annotate_peaks.py -c {a} -p permutation_peaks/combined_control.txt'.format(
+                a=args.config_ini))
             filter_by_reads_per_gene.run(args, lib)
         print "Successfully finished."
         sys.exit()
@@ -106,6 +108,8 @@ if __name__ == '__main__':
                 lib=lib, args=args)
             cluster_combine.run(args, lib, gtf, exons_as_rows)
             os.system('python annotate_peaks.py -c {a} -p permutation_peaks/combined_exp.txt'.format(
+                a=args.config_ini))
+            os.system('python annotate_peaks.py -c {a} -p permutation_peaks/combined_control.txt'.format(
                 a=args.config_ini))
             if args.filter_by_counts != '':
                 import filter_by_reads_per_gene

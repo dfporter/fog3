@@ -1,9 +1,7 @@
 import HTSeq
 import logging
-# import datetime
 import argparse
 import os
-# import time
 import traceback
 import sys
 import numpy as np

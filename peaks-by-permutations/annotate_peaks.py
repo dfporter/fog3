@@ -10,6 +10,8 @@ import glob
 import os
 import config
 
+
+
 def read_as_table(fname, use_col='WB ID', use_header_val=None):
     if use_header_val is not None:
         _table = {}
@@ -293,28 +295,42 @@ def get_cols(clip_list):
             print 'found %s' % name
             ratio_cols.append(name)
     out_cols.extend(ratio_cols)
+    out_cols.extend(['unnorm_' + x.partition('.bed')[0] for x in get_file_list(lib)])
     extras = ['gene_id', 'biotype', 'location', 'RIP_target', 'RIP_rank', 'height', 'padj', 'pvalue', 'log2FoldChange', 'seq',
-         'fog_CGGA',  'fog_GGCA',  'fog_GGTT',  'fog_TGGC',
-         'control_AATA',  'control_CCGG',  'control_TTAA', 'control_TTGT',
-         'fbf1n2_acaa', 'fbf1n2_ccgg', 'fbf1n2_tgcc', 'fbf2n2_acaa',
-         'fbf2n2_ccgg', 'fbf2n2_tgcc']
+         #'fog_CGGA',  'fog_GGCA',  'fog_GGTT',  'fog_TGGC',
+         #'control_AATA',  'control_CCGG',  'control_TTAA', 'control_TTGT',
+              'chrom', 'gene_len', 'Seq ID', 'pval',# 'dist_to_CDS',
+         #'fbf1n2_acaa', 'fbf1n2_ccgg', 'fbf1n2_tgcc', 'fbf2n2_acaa',
+         #'fbf2n2_ccgg', 'fbf2n2_tgcc',
+              'max_coverage']
     for name in extras:
         if name in obs_cols:
             out_cols.append(name)
     extra_unexpected = set(obs_cols) - set(out_cols)
-    for col in extra_unexpected: out_cols.append(col)
+    #for col in extra_unexpected: out_cols.append(col)
+    print "Extra unexpected "
+    print extra_unexpected
     return out_cols
 
 
 def add_height(clip_list, positives_include='exp'):
+    file_list = ['unnorm_' + x.partition('.bed')[0] for x in get_file_list(lib, just='positives')]
+    file_list = set(file_list)
+    print file_list
+    print "***"
     for gene in clip_list:
         for p in clip_list[gene]:
-            if 'height' in p and p['height'] != 0: continue
-            height = 0
-            for key in p.keys():
-                if re.match('.*%s.*' % positives_include, key) is not None:
-                    height += p[key]
-            p['height'] = height
+            print p
+            #if 'height' in p and p['height'] != 0: continue
+            p['height'] = 0
+            for key in [x for x in p.keys()]:# if x in file_list]:
+                print ">" + key
+                print "in %s?" % str(file_list)
+                if str(key) in file_list:
+                #if re.match('.*%s.*' % positives_include, key) is not None:
+                    p['height'] += p[key]
+                    print 'y'
+                else: print 'n'
 
 
 def read_bedgraph(fname, strand, bed=None):
@@ -331,26 +347,28 @@ def read_bedgraph(fname, strand, bed=None):
     return bed
 
 
-def get_file_list(lib):
+def get_file_list(lib, just=''):
     file_list = []
-    found_all = False
-    try_num = 1
-    while not found_all:
-        try_name = 'exp_bed{i}'.format(i=try_num)
-        if try_name in lib:
-            file_list.append(lib[try_name])
-        else:
-            found_all = True
-        try_num += 1
-    found_all = False
-    try_num = 1
-    while not found_all:
-        try_name = 'control_bed{i}'.format(i=try_num)
-        if try_name in lib:
-            file_list.append(lib[try_name])
-        else:
-            found_all = True
-        try_num += 1
+    if (just == '') or (just == 'positives'):
+        found_all = False
+        try_num = 1
+        while not found_all:
+            try_name = 'exp_bed{i}'.format(i=try_num)
+            if try_name in lib:
+                file_list.append(lib[try_name])
+            else:
+                found_all = True
+            try_num += 1
+    if (just == '') or (just == 'control') or (just == 'negatives'):
+        found_all = False
+        try_num = 1
+        while not found_all:
+            try_name = 'control_bed{i}'.format(i=try_num)
+            if try_name in lib:
+                file_list.append(lib[try_name])
+            else:
+                found_all = True
+            try_num += 1
     print "get_file_list(lib): %s" % str(file_list)
     return file_list
 
@@ -367,7 +385,7 @@ def add_reads_in_peak_from_bedgraph(peak_df, bedgraph_folder, lib):
     peaks = peak_df.to_dict('records')
     for row in peaks:
         for label in expected:
-            row[label] = max_depth(
+            row['unnorm_' + label] = max_depth(
                 gas[label], HTSeq.GenomicInterval(row['chrm'], row['left'],
                                                   row['right'], row['strand']))
     peak_df = pandas.DataFrame(peaks)
@@ -484,7 +502,7 @@ if __name__ == '__main__':
         description='''Annotates a peaks file (IN PLACE!).''')
     parser.add_argument(
         '-p', '--peaks', default='all_peaks.txt',
-        help='''A list of peaks with counts of reads for each dataset.'''
+        help='''A file or folder of peaks.'''
     )
     parser.add_argument(
         '-c', '--config_ini', default='analysis/',
@@ -492,4 +510,8 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
     lib = config.config(args.config_ini)
-    run(lib, args.peaks)
+    if os.path.isfile(args.peaks):
+        run(lib, args.peaks)
+    elif os.path.isdir(args.peaks):
+        for peaks_fname in glob.glob(args.peaks +'/*'):
+            run(lib, peaks_fname)

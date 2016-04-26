@@ -15,22 +15,24 @@ else:
         print "Exiting..."
         sys.exit()
 
+top = os.path.abspath(top)
+
 # Defaults.
-bed_dir = './bed_collapsed/'
-bedgraphs_dir = './bedgraphs_unnorm/'
+bed_dir = os.path.abspath('./bed_collapsed/')
+bedgraphs_dir = os.path.abspath('./bedgraphs_unnorm/')
 control_beds = []
 exp_beds = []
 
-if os.path.exists(top + '/bed_collapsed/'):
+if os.path.exists(os.path.join(top, 'bed_collapsed/')):
     bed_dir = top + '/bed_collapsed/'
     for rep in glob.glob(bed_dir + '/*.bed'):
         if re.search('control', rep):
             control_beds.append(rep)
         else:
             exp_beds.append(rep)
-if os.path.exists(top + '/bedgraph_unnorm/'):
-    bedgraphs_dir = top + '/bedgraph_unnorm'
-elif os.path.exists(top + '/bedgraphs/'):
+if os.path.exists(os.path.join(top, 'bedgraph_unnorm/')):
+    bedgraphs_dir = os.path.join(top, 'bedgraph_unnorm')
+elif os.path.exists('./bedgraphs/'):
     if raw_input(
         "Looked for bedgraphs_unnorm but only found bedgraphs/ folder. \
 Use that? [y/n]>").lower() == 'y':

@@ -87,21 +87,25 @@ def cor_with_abundance(df):
     plt.tight_layout()
     plt.savefig('corwithabundance.pdf', format='pdf')
 
+"""
 
+"""
 def clean(y_fc, y_oo, y_sp):
     tup = zip(y_fc, y_oo, y_sp)
     tup = [x for x in tup if np.all(np.isfinite(x))]
     return (
         [x[0] for x in tup], [x[1] for x in tup], [x[2] for x in tup])
 
+
 def get_limits(x, y):
     x = np.array(x)
     y = np.array(y)
     a = np.nanmin(x)
-    b= np.nanmax(x)
-    c= np.nanmin(y)
-    d =np.nanmax(y)
+    b = np.nanmax(x)
+    c = np.nanmin(y)
+    d = np.nanmax(y)
     return [a, b, c, d]
+
     
 if __name__ == '__main__':
     indir = sys.argv[1]
@@ -109,7 +113,8 @@ if __name__ == '__main__':
         pk = peaksList(name='FOG-3')
         pk.read_csv(fname)
         print pk
-        #pk.read_sp_vs_oo()
+        pk.read_sp_vs_oo()
         pk.annotate_sp_vs_oo()
+        pk.read_sp_vs_oo_as_programs()
         print pk
         cor_with_abundance(pk.df)
