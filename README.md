@@ -36,46 +36,6 @@ Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
  at least 20.
  ```
 
-```TeX
-Reads were aligned to the WS235 genome using STAR with previously described
- parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
- except for the parameters --alignEndsType Local and
- --outFilterMultimapScoreRange 0.
-Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
- mappings were selected as those with alignment scores (STAR "AS" field) of
- at least 20.
- ```
-
-```Tea
-Reads were aligned to the WS235 genome using STAR with previously described
- parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
- except for the parameters --alignEndsType Local and
- --outFilterMultimapScoreRange 0.
-Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
- mappings were selected as those with alignment scores (STAR "AS" field) of
- at least 20.
- ```
-
-```Twig
-Reads were aligned to the WS235 genome using STAR with previously described
- parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
- except for the parameters --alignEndsType Local and
- --outFilterMultimapScoreRange 0.
-Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
- mappings were selected as those with alignment scores (STAR "AS" field) of
- at least 20.
- ```
-
-```Vue
-Reads were aligned to the WS235 genome using STAR with previously described
- parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
- except for the parameters --alignEndsType Local and
- --outFilterMultimapScoreRange 0.
-Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
- mappings were selected as those with alignment scores (STAR "AS" field) of
- at least 20.
- ```
-
 Here's the mapping code:
 
 ```python
@@ -167,9 +127,19 @@ General analysis
 
 Running find_peaks_by_permutations.py will make a call to peaks_by_pemutations/annotate_peaks.py.
 
-This will load the -c .ini file, and add reads in peaks from lib['bedgraphs_folder'], which will be the unnormalized bedgraphs.
-The added values will represent the max depth in the peak region in absolute read number.
+This will load the -c .ini file, and add reads in peaks from
+lib['bedgraphs_folder'], which will be the unnormalized bedgraphs.
+The added values will represent the max depth in the peak region in
+absolute read number.
 
+```AsciiDoc
+Reads were assigned to genes using HTSeq [x2].
+Overlapping reads were defined as clusters. All reads within a
+gene had their position randomized 1000 times to empirically determine
+a cluster p value as the odds of having a cluster with the given read
+number with randomized read positions.
+A BH correction for multiple hypothesis testing was then applied at 1% FDR. 
+```
 
 Supp Dataset 1. FOG-3 iCLIP mapping statistics. 
 Made by fog3/stats/file_stats.py
@@ -183,6 +153,7 @@ python stats/peaks_file.py -i permutation_peaks
 # To get Dataset 3 as well:
 $ python stats/peaks_file.py -i permutation_peaks -c tables/cims_annotated.txt
 ```
+
 
 From text
 ----
