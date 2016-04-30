@@ -24,6 +24,58 @@ python bed_to_wig.py
 python peaks-by-permutations.py
 ```
 
+The mapping and filtering can be summarized as:
+
+```AsciiDoc
+Reads were aligned to the WS235 genome using STAR with previously described
+ parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
+ except for the parameters --alignEndsType Local and
+ --outFilterMultimapScoreRange 0.
+Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
+ mappings were selected as those with alignment scores (STAR "AS" field) of
+ at least 20.
+ ```
+
+```TeX
+Reads were aligned to the WS235 genome using STAR with previously described
+ parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
+ except for the parameters --alignEndsType Local and
+ --outFilterMultimapScoreRange 0.
+Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
+ mappings were selected as those with alignment scores (STAR "AS" field) of
+ at least 20.
+ ```
+
+```Tea
+Reads were aligned to the WS235 genome using STAR with previously described
+ parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
+ except for the parameters --alignEndsType Local and
+ --outFilterMultimapScoreRange 0.
+Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
+ mappings were selected as those with alignment scores (STAR "AS" field) of
+ at least 20.
+ ```
+
+```Twig
+Reads were aligned to the WS235 genome using STAR with previously described
+ parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
+ except for the parameters --alignEndsType Local and
+ --outFilterMultimapScoreRange 0.
+Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
+ mappings were selected as those with alignment scores (STAR "AS" field) of
+ at least 20.
+ ```
+
+```Vue
+Reads were aligned to the WS235 genome using STAR with previously described
+ parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
+ except for the parameters --alignEndsType Local and
+ --outFilterMultimapScoreRange 0.
+Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
+ mappings were selected as those with alignment scores (STAR "AS" field) of
+ at least 20.
+ ```
+
 Here's the mapping code:
 
 ```python
@@ -56,17 +108,6 @@ STAR --alignIntronMax 1 --sjdbGTFfile {sjdb} \
 '''.format(sjdb=paths['sjdb'],
         indexes=paths['indexes'], rin=fastq_filename, prefix=bname + '_')
 ```
-The mapping and filtering can be therefore summarized as:
-
-```AsciiDoc
-Reads were aligned to the WS235 genome using STAR with previously described
- parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
- except for the parameters --alignEndsType Local and
- --outFilterMultimapScoreRange 0.
-Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
- mappings were selected as those with alignment scores (STAR "AS" field) of
- at least 20.
- ```
 
 Here's where unique/multimapping reads are split:
 
