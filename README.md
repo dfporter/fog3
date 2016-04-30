@@ -24,6 +24,84 @@ python bed_to_wig.py
 python peaks-by-permutations.py
 ```
 
+Here's the mapping code:
+
+```python
+
+local_paths={
+     'indexes': '/opt/STAR-STAR_2.4.2a/bin/Linux_x86_64/indexes/',
+     'gtf': '/opt/lib/Caenorhabditis_elegans.WBcel235.78.noheader.gtf',
+     'sjdb': '/opt/lib/sjdb.txt'}
+
+def call_star(args, paths=None):
+    in_dir = args.input_dir
+    for fastq_filename in glob.glob(in_dir + '/*.fastq'):
+        print fastq_filename
+        bname = os.path.basename(fastq_filename).partition('.fastq')[0]
+        # CSEQ parameters. http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf
+        # Defaults changed:
+        # --outFilterMultimapScoreRange is default 1
+        # --alignEndsType EndToEnd for CSEQ.
+        # We've added the --runThreadN for multithreading (faster speed, same output).
+        #
+        cmd = '''
+STAR --alignIntronMax 1 --sjdbGTFfile {sjdb} \
+--genomeDir {indexes} --readFilesIn {rin} --outSAMunmapped "Within" \
+--outFilterMultimapNmax 3 --outFilterMismatchNmax 2 \
+--seedSearchStartLmax 6 --winAnchorMultimapNmax 10000 --alignEndsType Local \
+--sjdbGTFtagExonParentTranscript transcript_id \
+--outFilterMultimapScoreRange 0  --runThreadN 8 \
+--outFileNamePrefix {prefix} \
+--alignTranscriptsPerReadNmax 100000
+'''.format(sjdb=paths['sjdb'],
+        indexes=paths['indexes'], rin=fastq_filename, prefix=bname + '_')
+```
+The mapping and filtering can be therefore summarized as:
+
+```AsciiDoc
+Reads were aligned to the WS235 genome using STAR with previously described
+ parameters (CSEQ http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf),
+ except for the parameters --alignEndsType Local and
+ --outFilterMultimapScoreRange 0.
+Uniquely mapping reads were identified by selecting MAPQ=255, high-confidence
+ mappings were selected as those with alignment scores (STAR "AS" field) of
+ at least 20.
+ ```
+
+Here's where unique/multimapping reads are split:
+
+```python
+        with open('{d}/{a}'.format(d=unique_dir, a=os.path.basename(sam)), 'w') as uniquef:
+            unique = get_lines_with_mapq_val(samn=sam, mapq='255')
+            uniquef.write(unique)
+            with open('{d}/{a}'.format(d=multi_dir, a=os.path.basename(sam)), 'w') as multif:
+                multif.write(unique)
+        with open('{d}/{a}'.format(d=multi_dir, a=os.path.basename(sam)), 'a') as multif:
+            multi = get_lines_with_mapq_val(samn=sam, mapq='3', include_header=False)
+            multif.write(multi)
+```
+
+And here's the filtering out of < 20 quality reads.
+```python
+
+    for sam in glob.glob('uniquely_mapping/*.sam'):
+        header = ''
+        outli = ''
+        for li in open(sam).readlines():
+            if li[0] == '@':
+                header += li
+                continue
+            s = li.rstrip('\n').split('\t')
+            as_flag = re.match('.*AS:i:(\d+).*', str(s[11:]))
+            if as_flag is not None:
+                as_value = int(as_flag.group(1))
+            else:
+                print "No AS value?"
+            if as_value < 20: continue
+            outli += li
+        open('uniquely_mapping_20_AS/{a}'.format(a=os.path.basename(sam)), 'w').write(header + outli)
+```
+
 We will keep track of where the reads have gone in tables/read_stats.xls.
 
 |    Folder     | Description |
@@ -50,6 +128,124 @@ Running find_peaks_by_permutations.py will make a call to peaks_by_pemutations/a
 
 This will load the -c .ini file, and add reads in peaks from lib['bedgraphs_folder'], which will be the unnormalized bedgraphs.
 The added values will represent the max depth in the peak region in absolute read number.
+
+
+Supp Dataset 1. FOG-3 iCLIP mapping statistics. 
+Made by fog3/stats/file_stats.py
+
+Supp Dataset 2. FOG-3 target RNAs.
+Supp Dataset 3. FOG-3 CIMS.
+
+```bash
+python stats/peaks_file.py -i permutation_peaks
+
+# To get Dataset 3 as well:
+$ python stats/peaks_file.py -i permutation_peaks -c tables/cims_annotated.txt
+```
+
+From text
+----
+
+After normalization to a negative control (see Methods),
+most of the enriched sequences were from mRNAs (Fig 4A).
+
+```bash
+make_figs.py
+# Outputs to figs/location_*.pdf
+```
+
+Most of the 605  [larger list: 1388] FOG-3 mRNA targets are associated with
+oogenesis (Fig 4B), as previously observed in microarray studies (cit XXX). 
+
+```bash
+make_figs.py
+# Outputs to figs/gender_*.pdf
+```
+
+The iCLIP targets overlapped significantly with the microarray target list
+(Supp Fig 5F-G, p value < 10-208 [larger list, 10^-227]), but was even more
+depleted in genes associated with spermatogenesis
+(Supp Fig 5H, p value < 10-24 [larger list < 10^49]).
+
+```bash
+make_figs.py
+# Outputs to figs/*.pdf
+
+# This is not discarding ncRNA. Doing so increases significance
+# around 1e3 fold for both aligners.
+
+# novoalign
+Statistics for figs/overlap_with_rip_venn_clip.pdf overlap with RIP:
+Genome size 12839 (all germline RNAs).
+[[11220, 456], [952, 266]]
+(6.875, 1.2939754179801647e-96)
+Genome size 12839 (20k gene genome).
+[[18326.0, 456], [952, 266]]
+(11.229166666666666, 7.2166322496851259e-142)
+
+# star
+Statistics for figs/overlap_with_rip_venn_clip.pdf overlap with RIP:
+     [[(-R, -C), (+R, -C)],
+      [(-R, +C), (+R, +C)]]
+Genome size 12839 (all germline RNAs).
+[[11402, 492], [764, 230]]
+(6.9767058272676969, 4.4869857195357939e-87)
+Genome size 12839 (20k gene genome).
+[[18514.0, 492], [764, 230]]
+(11.328427616736901, 2.8738015736746662e-126)
+```
+
+A majority of the sequences mapped to the 3’ UTRs (Fig 4C-D),
+with an apparent preference for the beginning versus the end of the region
+(Fig 4E).
+
+```bash
+python fog3analysis/feature_locations/determine_feature_locations_ui.py \
+       -c auto.ini -i permutation_peaks/combined_exp.txt
+```
+
+Furthermore,326/605 [larger list: 983/1388] mRNAs had two or more sequence
+peaks spreading across the 3’UTR (Fig 4F, Supp Fig 5I-J). 
+
+This binding pattern was reminiscent of other non-specific RNA binding
+proteins, like ataxin and HuR (XXX cit). 
+
+Few peaks were observed in the 5’ UTR and protein coding regions (Fig 4C-D),
+implying FOG-3 RNA binding was restricted to the 3’ region. 
+
+We did not observe a strong sequence preference in the identified peaks,
+but in a subset of the peaks we did see a preference for CU repeats,
+a UA rich motif and a CUCA motif (Supp Fig 5K-L). CU repeats may show be
+evidence for sequence preference by FOG-3 or bias for UV protein-RNA
+crosslinking (cit XXX).
+
+
+Mapping
+----
+
+|    Folder     | Description |
+|    ------     | ----------- | 
+|mapping/fastq  | Raw fastq   |
+|mapping/temp_clipped | Fastq files ready to be mapped|
+|mapping/sams   | Filtered sams - uniquely mapping, 20 AS |
+|mapping/bed_uncollapsed | Uncollapsed bed files made from mapping/sams|
+|mapping/bed_collapsed | Beds collapsed from bed_uncollapsed |
+
+Mapping statistics are obtained with:
+
+```bash
+# Looks for subfolders in the folders given by i, b and c arguments.
+# The order does not matter.
+python file_stats.py -i cims/ -b mapping/ -c ./
+# This outputs Dataset 1 to tables/.
+
+# With FBF:
+# I put symlinks to the mapping folder in the cims folder
+# so this script can find everything related to mapping, both for STAR
+# and novoalign, in the cims/ folder.
+dfporter at kimble-1 in /groups/Kimble/Common/fog_iCLIP/stats on master* b8caca3
+$ python file_stats.py -i ../cims -b ../../fbf_celltype/cims/ -o fog3_file_stats
+```
 
 Gender analysis
 ----
@@ -79,32 +275,10 @@ The next question is - how does this abundance bias affect the SP/OO
  category size to be observed? So we take the observed range of abundances,
  and fit a histogram along each axis.
 
-
 On a different note, we could take each gene's (x_sp, y_oo) coordinate,
  and rotate by 45 degrees.
 
-Mapping
-----
 
-|    Folder     | Description |
-|    ------     | ----------- |
-|mapping/fastq  | Raw fastq   |
-|mapping/temp_clipped | Fastq files ready to be mapped|
-|mapping/sams   | Filtered sams - uniquely mapping, 20 AS |
-|mapping/bed_uncollapsed | Uncollapsed bed files made from mapping/sams|
-|mapping/bed_collapsed | Beds collapsed from bed_uncollapsed |
-
-Mapping statistics are obtained with:
-
-```bash
-python file_stats.py -c config.ini -o fog3_file_stats
-
-# Or more fully, I put symlinks to the mapping folder in the cims folder
-# so this script can find everything related to mapping, both for STAR
-# and novoalign, in the cims/ folder.
-dfporter at kimble-1 in /groups/Kimble/Common/fog_iCLIP/stats on master* b8caca3
-$ python file_stats.py -i ../cims -b ../../fbf_celltype/cims/ -o fog3_file_stats
-```
 
 CIMS analysis
 ----
@@ -141,4 +315,24 @@ pyhton pos_vs_motif.py -i cims_tables/ -m A_MOTIF
 # Outputs a line plot and some seqlogos.
 ```
 
+Novoalign peak calls
+----
 
+Could use the novoaligned reads for peak calls.
+Work is in cims/.
+
+```bash
+# Generated bedgraphs.
+# Split non-rRNA files.
+# Generated auto.ini.
+# Ran peak caller.
+
+python peaks-by-permutations/annotate_peaks.py -p permutation_peaks/combined_control.txt -c auto.ini 
+python peaks-by-permutations/annotate_peaks.py -p permutation_peaks/combined_exp.txt -c auto.ini
+python ../fog3analysis/make_figs.py -i permutation_peaks/
+mkdir data
+mkdir data/feat_loc
+mkdir figs/permutation_peaks
+python ../fog3analysis/feature_locations/determine_feature_locations_ui.py -c auto.ini -i permutation_peaks/combined_exp.txt 
+
+```

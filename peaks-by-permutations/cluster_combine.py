@@ -55,10 +55,6 @@ def get_reproducible_peaks(ivs_by_gene):
         # [left, right,, max_coverage=number of replicates with peak,
         #       a zero for p value]
         filtered_clust = [clust for clust in clusters if clust[2] > 1]
-        # for clust in clusters:
-        #     if clust[2] > 2:
-        #         filtered_clust.append(clust)
-        # clusters = [x for x in clusters if x[2]>2]
         if len(filtered_clust) > 0:
             clusters_by_gene[gene] = filtered_clust #[x.extend([0]) for x in clusters]
     return clusters_by_gene
@@ -74,16 +70,9 @@ def get_combined_clusters_from_file_list(
         max_padj=0.01, min_coverage=2):
     ivs_by_gene = get_ivs_by_gene(
         file_list, max_padj=max_padj, min_coverage=min_coverage)
-    print 'ivs by gene'
-    print ivs_by_gene
     clusters_by_gene = get_reproducible_peaks(ivs_by_gene)
-    print 'clusters_by_gene'
-    print clusters_by_gene
-    # print clusters_by_gene
     if len(clusters_by_gene) > 0:
         table = cluster_reads.convert_to_table(clusters_by_gene, exons_as_rows)
-        # print table['gene_id'].value_counts()
-        # print len(table['gene_id'].value_counts())
         if not os.path.exists(os.path.dirname(output_filename)):
             scribe('mkdir ' + os.path.dirname(output_filename))
         try:
@@ -213,7 +202,7 @@ def run(args, lib, gtf, exons_as_rows, max_padj=0.01, min_num_reps=2):
     table = get_combined_clusters_from_file_list(
         experimentals, exons_as_rows, output_filename=output_filename,
         max_padj=max_padj, min_coverage=min_num_reps)
-    print "409" * 20
+    print "=" * 20
     print table
     verification(table)
     control_beds = set([lib[x] for x in lib if re.match('control_bed.*', x)])

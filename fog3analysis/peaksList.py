@@ -40,6 +40,9 @@ Classifications:
         if ('WB ID' not in self.df.columns) and (
             'Wormbase ID' in self.df.columns):
             self.df['WB ID'] = self.df['Wormbase ID']
+        if ('Wormbase ID' not in self.df.columns) and (
+            'WB Gene ID' in self.df.columns):
+            self.df['Wormbase ID'] = self.df['WB Gene ID']
 
     def to_csv(self, fname):
         self.df.to_csv(fname, sep='\t', index=False)
@@ -101,8 +104,9 @@ Classifications:
                 sys.exit()
         wb_program_oo.update(wb_program_sp)
         self.program = wb_program_oo
-        self.df['Wormbase ID'] = [self.name_to_wbid[x] for x in \
-                                  self.df[self.gene_name_col].tolist()]
+        if ('Wormbase ID' not in self.df.columns):
+            self.df['Wormbase ID'] = [self.name_to_wbid[x] for x in \
+                                      self.df[self.gene_name_col].tolist()]
         self.df['Program'] = [self.what_program(x) for x in \
                               self.df['Wormbase ID'].tolist()]
 
@@ -232,8 +236,8 @@ Classifications:
     def get_val(self, ga, iv):
         return np.max(np.fromiter(ga[iv], dtype=np.float))
     
-    def add_location_from_integral(self, gtf, ga, use_name=self.gene_name_col):
-        #if use_name is None: use_name = self.gene_name_col
+    def add_location_from_integral(self, gtf, ga, use_name=None):
+        if use_name is None: use_name = self.gene_name_col
         #assert(type(gtf) == type(pandas.DataFrame()))
         ivs = zip(self.df.chrm, self.df.left, self.df.right,
                   self.df.strand, self.df[use_name].tolist())
