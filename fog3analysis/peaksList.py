@@ -27,9 +27,11 @@ class peaksList(object):
     c=len(set(self.df[self.gene_name_col].tolist()))
     )
         if 'Classification OO/SP GL' in self.df.columns:
-            li += """
-Classifications:
-{d}""".format(d=str(self.df['Classification OO/SP GL'].value_counts()))
+            li += """\nClassifications  (from Ortiz Deseq file):\n{d}""".format(
+                d=str(self.df['Classification OO/SP GL'].value_counts()))
+        if 'Program' in self.df.columns:
+            li += """\nPrograms:\n{d}""".format(
+                d=str(self.df['Program'].value_counts()))
         return li
     
     def read_csv(self, fname):

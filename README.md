@@ -154,12 +154,75 @@ python stats/peaks_file.py -i permutation_peaks
 $ python stats/peaks_file.py -i permutation_peaks -c tables/cims_annotated.txt
 ```
 
+Figure text
+----
+
+These figure captions are from the docx, and differ from the
+pdf figures (Email Jan 14, or pdf in my folder modified Jan 14) we have.
+The docx is older (Dec 16), so we will edit the pdfs.
+
+Here are the captions from the docx:
+
+ (A) FOG-3 binds primarily to mRNAs.
+ iCLIP of FOG-3 crosslinked RNAs enriches for messenger RNAs.
+
+ (B) mRNAs bound to FOG-3 are associated with mitosis and oogenesis.
+ We observed a similar result with microarrays but saw further enrichment
+ with iCLIP. See text and Supp Fig 5 for further explanation.
+
+ (C) Distribution of binding sites within FOG-3 mRNAs.
+ Transcripts arranged by predicted nucleotide (nt) length,
+ from 5’ to 3’ UTR. Dotted line shows the end of the transcript.
+ Binding sites represented by a heat map, from no signal (white) to
+ strong signal (red). Note the prevalence of binding sites at the ends
+ of transcripts.
+
+ (D) Distribution of binding sites within mRNAs. Most
+ of the binding sites are found the 3’ UTR.
+
+ (E-F) Binding sites are found
+ throughout the 3’UTR. Transcripts arranged by predicted 3’UTR nucleotide
+ (nt) length, from coding region to transcript end. Transcript end and binding
+ sites again represented with a dotted line and a heat map, as in C.
+ The top enriched mRNA targets contain multiple binding sites covering
+ their 3’, as depicted by the peak representations in F.
+
+ (G) Model of FOG-3 assembly and function. FOG-3 forms a helical polymer
+ and binds across the 3’UTRs of target mRNA transcripts. This leads to
+ repression of mRNAs associated with the oogenic program, promoting sperm
+ specification. FOG-3 may target specific mRNAs through another RNA binding
+ protein that functions as a seed. Further discussion in the main text.
+
+And here are the PDF figures:
+
+4A. Line graph of location.
+4B. Pie chart of location.
+4C. Zoom in on UTR in 5A (Will not be included).
+4D. Histogram of peaks per gene.
+4E. Example genes.
+
+
+S5E Table of statistics.
+S5F Overlap with RIP venn.
+S5G Gender pie.
+S5H MEME motif.
+
+```bash
+python fog3analysis/make_figs.py \
+       -i peaks-by-permutations/permutation_peaks/ -c auto.ini
+# This outputs 4A-C and S5F-G.
+
+# S5E is made by stats/file_stats.py
+# 4D is made by number_of_clusters.py
+# Code for 4E is in subpeaks_ui.py, but needs work.
+# This leaves only S5H, which is not made by our scripts.
+```
 
 From text
 ----
 
 After normalization to a negative control (see Methods),
-most of the enriched sequences were from mRNAs (Fig 4A).
+most of the enriched sequences were from mRNAs (Fig 4A.)
 
 ```bash
 make_figs.py
@@ -172,7 +235,7 @@ oogenesis (Fig 4B), as previously observed in microarray studies (cit XXX).
 ```bash
 make_figs.py
 # Outputs to figs/gender_*.pdf
-```
+``` 
 
 The iCLIP targets overlapped significantly with the microarray target list
 (Supp Fig 5F-G, p value < 10-208 [larger list, 10^-227]), but was even more
