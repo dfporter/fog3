@@ -178,9 +178,8 @@ if __name__ == '__main__':
     import build_image_objects_for_heatmaps
     (peaks, txpts, chr_lens) = determine_feature_locations.get_data(
         args, lib=lib)
-    build_image_objects_for_heatmaps.heatmap_of_raw_signal(
-        peaks, txpts, output_dirname='figs/Fig1E_raw_signal_heatmap.pdf')
-
+#    build_image_objects_for_heatmaps.heatmap_of_raw_signal(
+#        peaks, txpts, output_dirname='figs/Fig1E_raw_signal_heatmap.pdf')
     peak_in_gene_line_plot.normalize_distances(txpts)
     (ave_peaks, ave_fbes, ave_negs, ave_polyA, ave_peak_v_polyA,
      ave_fbe_v_polyA, ave_highest_peak, ave_secondary_peaks
@@ -191,6 +190,7 @@ if __name__ == '__main__':
        output_filename='figs/Fig1Cmaybe_features_in_normalized_gene.pdf')
         #determine_feature_locations.make_figs(
         #    peaks, txpts, chr_lens, args, hold_original)
+    sys.exit()
     args.input = hold_original
     ##################
     cims_file = 'tables/cims_annotated.txt'

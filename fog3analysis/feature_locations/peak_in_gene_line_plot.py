@@ -30,7 +30,8 @@ def write_raw_table(list_of_lists):
 
 
 def plot_features(aves, output_filename='../clip/figs/features_in_normalized_gene.pdf'):
-    (ave_peaks, ave_fbes, ave_negs, ave_polyA, ave_highest_peak, ave_secondary_peaks) = aves
+    (ave_peaks, ave_fbes, ave_negs, ave_polyA, ave_highest_peak,
+     ave_secondary_peaks) = aves
     plt.clf()
     sorted_peaks = sort_and_make_fractions(ave_peaks)
     sorted_highest_peak = sort_and_make_fractions(ave_highest_peak)
@@ -42,7 +43,6 @@ def plot_features(aves, output_filename='../clip/figs/features_in_normalized_gen
         ret = sort_and_make_fractions(neg)
         #print 'ret: %s' % str(ret)
         sorted_negs.append(ret)
-#    sys.exit()
     sorted_polyA = sort_and_make_fractions(ave_polyA)
     plt.xlabel('Position (nt)')
     plt.ylabel('Frequency')
@@ -55,15 +55,18 @@ def plot_features(aves, output_filename='../clip/figs/features_in_normalized_gen
 #                [x[1] for x in sorted_polyA], label='poly(A)')
     plt.plot([x[0] for x in sorted_peaks],
                 [x[1] for x in sorted_peaks], label='Peaks')
+    plt.xlim([0, 1250])
     with open('peaks_in_normalized_gene.txt', 'w') as f:
         f.write(write_raw_table(sorted_peaks))
     with open('motifs_in_normalized_gene.txt', 'w') as f:
         f.write(write_raw_table(sorted_fbes))
-
-    pos = np.arange(0, 1400 + 200,200)
-    _ylabels = [r'''Start of UTR''', r'''Start''',
+    pos = np.arange(50, 1250 + 200, 200)
+    # 50,
+    # 250, 450, 650, 850,
+    # 1050, 1250
+    _ylabels = ["Start (AUG)",
                 '', '', '', '',
-                r'''Stop''', r'''End of UTR''']
+                "Stop", "End of UTR"]
     plt.xticks(pos, _ylabels)
     plt.legend(loc='upper left')
     print "\tSaving figure to %s" % output_filename
@@ -77,7 +80,7 @@ def plot_features(aves, output_filename='../clip/figs/features_in_normalized_gen
                 [x[1] for x in sorted_fbes], label='FBE')
     plt.plot([x[0] for x in sorted_peaks],
                 [x[1] for x in sorted_peaks], label='Peaks')
-    plt.xlim([1200,1400])
+    plt.xlim([1200, 1400])
     pos = np.arange(1200, 1400 + 100, 100)
     _ylabels = [r'''Start of UTR''', '',  r'''End of UTR''']
     plt.xticks(pos, _ylabels)
@@ -137,8 +140,6 @@ def sort_and_make_frequency(aves):
 
 def normalize_distances(txpts):
     for t in txpts:
-        print 'norm:'
-        print t
         txpts[t].normalize_features()
         txpts[t].get_peak_pos_relative_to_polyA()
         txpts[t].get_motif_pos_relative_to_polyA()
@@ -155,25 +156,19 @@ def get_ave_pos(txpts):
     ave_secondary_peak = {}
     ave_negs = [{}, {}, {}]
     # FBEs, polyA, and other motifs.
-    print "*(*(*" * 17
+    print " \/T\/ " * 7
     for t in txpts:
-        print t
-        print txpts[t].motif_locs
-        print txpts[t].norm_motif
         for _span in txpts[t].norm_motif:
-            print 'asdf'
-            print _span
             for pos in range(_span[0], _span[1]):
                 ave_motif.setdefault(pos, 0.)
                 ave_motif[pos] += 1.
-        for index, neg in enumerate([txpts[t].norm_neg1, txpts[t].norm_neg2, txpts[t].norm_neg3]):
+        for index, neg in enumerate([txpts[t].norm_neg1, txpts[t].norm_neg2,
+                                     txpts[t].norm_neg3]):
             for _span in neg:
                 for pos in range(_span[0], _span[1]):
                     ave_negs[index].setdefault(pos, 0.)
                     ave_negs[index][pos] += 1
         for _span in txpts[t].norm_polyA:
-            print 'a'
-            print _span
             for pos in range(_span[0], _span[1]):
                 ave_polyA.setdefault(pos, 0.)
                 ave_polyA[pos] += 1.
