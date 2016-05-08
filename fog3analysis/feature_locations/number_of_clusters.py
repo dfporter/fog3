@@ -1,3 +1,4 @@
+from __future__ import division
 import collections
 import numpy as np
 import HTSeq
@@ -25,6 +26,9 @@ def add_to_ga(ga, ga_to_add):
         for _iv in ga_to_add:
             ga[_iv] += 1
         return
+    if type(ga_to_add) == type(HTSeq.GenomicPosition('I', 1, '+')):
+        ga[ga_to_add] += 1
+        return
     for _iv, val in ga_to_add.steps():
         ga[_iv] += val
 
@@ -34,44 +38,53 @@ def write_bedgraph(bedgraph, filename):
     bedgraph.write_bedgraph_file(
         filename.partition('.wig')[0] + '_-.wig', strand='-')
 
+
+
+
+
 def analyze_by_applying_cwt_to_all_reads_in_gene(
-        gene_targets, coverage, txpts, chr_lens,
+        gene_targets, coverage, _gtf,
         output_dirname='figs/'):
     # Analysis by applying CWT to the total coverage in a gene.
     print 'Analysis by applying CWT to the total coverage in a gene...'
     subpeak_list = []
     clust_bedgraph = HTSeq.GenomicArray('auto', stranded=True)
     exons_bedgraph = HTSeq.GenomicArray('auto', stranded=True)
+    peak_pos_bedgraph = HTSeq.GenomicArray('auto', stranded=True)
+    peak_maxima_bedgraph = HTSeq.GenomicArray('auto', stranded=True)
     #coverage_bedgraph = HTSeq.GenomicArray('auto', stranded=True)
     for n, gene_name in enumerate(gene_targets):
-        #if n > 100: break
-        if gene_name not in txpts:
+        if not( n % 100):
+            cliputil.printProgress(
+                n, len(gene_targets), prefix='Identifying subpeaks... ')
+            print '',
+        if gene_name not in _gtf.sbgenes:
             print "Missing " + gene_name
             continue
-        gene = txpts[gene_name]
+        sp = _gtf.sbgenes[gene_name]
 #        if gene.strand == '-': continue
-        sp = sbGene(HTSeq.GenomicInterval(
-            gene.chrom, gene.txpt_left, gene.txpt_right, gene.strand))
+        #sp = sbGene(HTSeq.GenomicInterval(
+        #    gene.chrom, gene.txpt_left, gene.txpt_right, gene.strand))
         sp.gene_name = gene_name
-        sp.chr_lens = chr_lens
+        sp.chr_lens = _gtf.chr_lens
         #sp.determine_coverage_accross_exons(coverage, txpts[sp.gene_name].exons_dict)
         #exons_dict = sp.rc_exons_dict_if_minus(
         #    sp.strand, txpts[sp.gene_name].exons_dict)
         if gene_name == 'mpk-1':
             print 'nofc'
-            print gene.exons_dict
+            print sp.exons_dict
         sp.find_subpeaks(
-            coverage, gene.exons_dict,
-            rc_exons_dict_if_minus=gene.minus_strand_flipped)
-        if gene.strand == '-':
-            print "Minus strand gene. %s" % gene_name
-            print str([tup for tup in sp.exon_ivs])[:200]
+            coverage, sp.exons_dict,
+            rc_exons_dict_if_minus=sp.minus_strand_flipped)
         subpeak_list.append(sp)
         add_to_ga(clust_bedgraph, sp.clusters_as_ga)
         add_to_ga(exons_bedgraph, sp.exon_ivs)
+        add_to_ga(peak_pos_bedgraph, sp.peak_pos_iv)
+        add_to_ga(peak_maxima_bedgraph, sp.peak_maxima_iv)
     write_bedgraph(clust_bedgraph, 'pattern_bedgraphs/clusters.wig')
     write_bedgraph(exons_bedgraph, 'pattern_bedgraphs/exons.wig')
-        
+    write_bedgraph(peak_pos_bedgraph, 'pattern_bedgraphs/peak_pos.wig')
+    write_bedgraph(peak_maxima_bedgraph, 'pattern_bedgraphs/peak_maxima.wig')
     num_of_peaks = collections.defaultdict(int)
     for sp in subpeak_list:
         num_of_peaks[sp.gene_name] = sp.n_peaks
@@ -126,18 +139,6 @@ def read_args():
     return args
 
 
-def process_file(filename, coverage, txpts, sequences, chr_lens, args=None,
-                 lib=None):
-    print 'process_file():'
-    output_dirname = 'figs/{d}/'.format(d=os.path.basename(os.path.dirname(filename)))
-    print "Writing to {s}.".format(s=output_dirname)
-    gene_targets = set(
-        pandas.read_csv(filename, sep='\t')['gene_name'].tolist())
-    gene_targets = filter(lambda x: isinstance(x, str), gene_targets)
-    analyze_by_applying_cwt_to_all_reads_in_gene(
-        gene_targets, coverage, txpts, chr_lens, 
-        output_dirname=output_dirname)
-
 if __name__ == '__main__':
     args = read_args()
     lib = config.config(filepath=args.config_ini)
@@ -155,8 +156,15 @@ if __name__ == '__main__':
     plus_file = lib['bedgraph_exp_plus']
     minus_file = lib['bedgraph_exp_minus']
     ga = cliputil.get_a_bedgraph(plus_file, minus_file)
-    (peaks, txpts, chr_lens) = determine_feature_locations.get_data(
-        args, lib=lib)
-    (sequences, rc_sequences, chr_lens) = cliputil.get_sequences(lib)
-    process_file(args.input, ga, txpts, sequences,
-                 chr_lens, args=args, lib=lib)
+    _gtf = cliputil.load_gtf(lib=lib)
+    peaks = _gtf.flip_minus_strand_peak_features(
+        pandas.read_csv(args.input, sep='\t'))
+    _gtf.add_peak_locations_to_transcripts(peaks)
+    #(sequences, rc_sequences, chr_lens) = cliputil.get_sequences(lib)
+    output_dirname = 'figs/{d}/'.format(
+        d=os.path.basename(os.path.dirname(args.input)))
+    print "Writing to {s}.".format(s=output_dirname)
+    gene_targets = set(peaks['gene_name'].tolist())
+    analyze_by_applying_cwt_to_all_reads_in_gene(
+        gene_targets, ga, _gtf,
+        output_dirname=output_dirname)

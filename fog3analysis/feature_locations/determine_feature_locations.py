@@ -211,16 +211,7 @@ def get_txpts(args, sequences, rc_sequences, peaks, utr, exon, cds, other,
     return txpts
 
 
-def add_peak_locations_to_transcripts(peaks, txpts, chr_lens):
-    peaks_d = to_dict(peaks)
-    all_added_peak_locs = []
-    for gene_name in peaks_d:
-        if gene_name in txpts:
-            txpts[gene_name].find_peaks(peaks_d, chr_lens)
-    return txpts
-
-
-def get_data(args, lib=None):
+def get_data(args, lib=None, return_gtf=False):
     if lib is None:
         lib = {'gtf': 'lib/gtf_with_names_column.txt',
                'gtf_one_txpt_per_gene': 'lib/gtf_one_txtp_per_gene.txt'}
@@ -232,21 +223,24 @@ def get_data(args, lib=None):
     print "Getting sequences..."
     (sequences, rc_sequences, chr_lens) = cliputil.get_sequences(lib)
     print "Getting GTF..."
-    g = gtf(lib['gtf_one_txpt_per_gene'])
-    g.flip_minus_strand_features(chr_lens)
-    g.make_genes(sequences, rc_sequences, chr_lens)
-    txpts = g.flocs_map
+    g = gtf(lib['gtf_one_txpt_per_gene'], chr_lens)
+    g.sequences = sequences
+    g.rc_sequences = rc_sequences
+    g.flip_minus_strand_features()
+    g.make_genes(sequences, rc_sequences)
     (utr, exon, cds, other) = g.as_list()
     peaks = g.flip_minus_strand_peak_features(
-        pandas.read_csv(args.input, sep='\t'), chr_lens)
+        pandas.read_csv(args.input, sep='\t'))
     print '---- finished getting txpts. Adding peaks to transcripts...'
-    txpts = add_peak_locations_to_transcripts(peaks, txpts, chr_lens)
-    print txpts['mpk-1'].exons_dict
+    g.add_peak_locations_to_transcripts(peaks)
+    print g.flocs_map['mpk-1'].exons_dict
     print "Loading bedgraph signal..."
     peaks, txpts = load_signal_from_bedgraph(
-        peaks, txpts, chr_lens, load_existing_data=args.load_txpts,
+        peaks, g.flocs_map, chr_lens, load_existing_data=args.load_txpts,
         lib=lib)
     print txpts['mpk-1'].exons_dict
+    if return_gtf:
+        return peaks, g
     return peaks, txpts, chr_lens
 
 
