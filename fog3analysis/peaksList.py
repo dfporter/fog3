@@ -126,6 +126,18 @@ class peaksList(object):
         self.name_to_wbid = collections.defaultdict(str)
         self.name_to_wbid.update(dict(zip(
             gtf['gene_name'].tolist(), gtf['gene_id'].tolist())))
+        self.name_to_biotype = dict(zip(
+            gtf['gene_name'].tolist(), gtf['biotype'].tolist()))
+
+    def add_gene_name(self, gtfname):
+        if not hasattr(self, 'wbid_to_name'):
+            self.transl(gtfname)
+        self.df['gene_name'] = [self.wbid_to_name[x] for x in self.df.gene_id]
+
+    def add_biotype(self, gtfname):
+        if not hasattr(self, 'name_to_biotype'):
+            self.transl(gtfname)
+        self.df['biotype'] = [self.name_to_biotype[x] for x in self.df.gene_name]
 
     def read_sp_vs_oo(self, fname='/opt/lib/ortiz/DESeq_genes_in_gonad.txt'):
         """/opt/lib/ortiz/DESeq_genes_in_gonad.txt
@@ -241,6 +253,8 @@ class peaksList(object):
     def add_location_from_integral(self, gtf, ga, use_name=None):
         if use_name is None: use_name = self.gene_name_col
         #assert(type(gtf) == type(pandas.DataFrame()))
+        if 'chrm' not in self.df.columns:
+            self.df['chrm'] = self.df['chrom']
         ivs = zip(self.df.chrm, self.df.left, self.df.right,
                   self.df.strand, self.df[use_name].tolist())
         located_peaks = [locatedPeak(*iv) for iv in ivs]

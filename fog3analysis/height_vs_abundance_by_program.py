@@ -4,6 +4,8 @@ import os
 import sys
 import glob
 import numpy as np
+sys.path.insert(0,
+                '/Kimble/Common/fbf_celltype/cliputil/')
 from peaksList import *
 import matplotlib.pyplot as plt
 import numpy as np

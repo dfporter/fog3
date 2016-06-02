@@ -1,11 +1,551 @@
-..//bed_collapsed/
-Traceback (most recent call last):
-  File "find_peaks_by_permutations.py", line 87, in <module>
-    args=args, lib=lib)
-  File "/groups/Kimble/Common/fog_iCLIP/peaks-by-permutations/get_bed_files.py", line 10, in get_bed_files
-    for feature in gtf:
-  File "/usr/lib64/python2.6/site-packages/HTSeq-0.5.4p3-py2.6-linux-x86_64.egg/HTSeq/__init__.py", line 210, in __iter__
-    for line in FileOrSequence.__iter__( self ):
-  File "/usr/lib64/python2.6/site-packages/HTSeq-0.5.4p3-py2.6-linux-x86_64.egg/HTSeq/__init__.py", line 51, in __iter__
-    lines = open( self.fos )
-IOError: [Errno 2] No such file or directory: '..//lib//Caenorhabditis_elegans.WBcel235.78.noheader.gtf'
+/groups/Kimble/Common/fog_iCLIP/bed_collapsed/
+get_bed_files:
+['/groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_TTAA.bed', '/groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_TTGT.bed', '/groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_CCGG.bed', '/groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_AATA.bed', '/groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_GGTT.bed', '/groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_CGGA.bed', '/groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_TGGC.bed', '/groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_GGCA.bed']
+Stats on /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_TTAA.bed:
+
+    Genes: 547
+    Reads: 790
+    Mean reads per gene: 1.44424131627
+    Median reads per gene: 1.0
+    Highest number per gene: 19
+    Lowest number per gene: 1
+    
+Stats on /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_TTGT.bed:
+
+    Genes: 2607
+    Reads: 5849
+    Mean reads per gene: 2.24357499041
+    Median reads per gene: 1.0
+    Highest number per gene: 34
+    Lowest number per gene: 1
+    
+Stats on /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_CCGG.bed:
+
+    Genes: 269
+    Reads: 343
+    Mean reads per gene: 1.2750929368
+    Median reads per gene: 1.0
+    Highest number per gene: 15
+    Lowest number per gene: 1
+    
+Stats on /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_AATA.bed:
+
+    Genes: 808
+    Reads: 1207
+    Mean reads per gene: 1.49381188119
+    Median reads per gene: 1.0
+    Highest number per gene: 17
+    Lowest number per gene: 1
+    
+Stats on /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_GGTT.bed:
+
+    Genes: 4447
+    Reads: 16860
+    Mean reads per gene: 3.79131999101
+    Median reads per gene: 2.0
+    Highest number per gene: 72
+    Lowest number per gene: 1
+    
+Stats on /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_CGGA.bed:
+
+    Genes: 4057
+    Reads: 15044
+    Mean reads per gene: 3.70815873798
+    Median reads per gene: 2.0
+    Highest number per gene: 63
+    Lowest number per gene: 1
+    
+Stats on /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_TGGC.bed:
+
+    Genes: 6875
+    Reads: 43526
+    Mean reads per gene: 6.33105454545
+    Median reads per gene: 3.0
+    Highest number per gene: 136
+    Lowest number per gene: 1
+    
+Stats on /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_GGCA.bed:
+
+    Genes: 5163
+    Reads: 24197
+    Mean reads per gene: 4.68661630835
+    Median reads per gene: 2.0
+    Highest number per gene: 90
+    Lowest number per gene: 1
+    
+Getting exonic ranges from /opt/lib//gtf_with_names_column.txt
+returning defaultdict(<type 'list'>, {'WBGene00168698': [{'exon_number': '1', 'gene_id': 'WBGene00168698', '1'
+*******
+Finding clusters in /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_AATA.bed
+
+    Genes: 808
+    Reads: 1207
+    Mean reads per gene: 1.49381188119
+    Median reads per gene: 1.0
+    Highest number per gene: 17
+    Lowest number per gene: 1
+    
+Example of cluster calls for /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_AATA.bed:
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+2   III  13464492  13464534             2  WBGene00006439      +  0.268   
+3     V  16341811  16341854             2  WBGene00014408      +  0.793   
+4   III   2032939   2032971             2  WBGene00023109      -  0.677   
+
+   height      padj past_fdr  
+2       2  0.364656    False  
+3       2  0.833152    False  
+4       2  0.769740    False  
+*******
+Finding clusters in /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_GGCA.bed
+
+    Genes: 5163
+    Reads: 24197
+    Mean reads per gene: 4.68661630835
+    Median reads per gene: 2.0
+    Highest number per gene: 90
+    Lowest number per gene: 1
+    
+Example of cluster calls for /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_GGCA.bed:
+  chrom     left    right  max_coverage         gene_id strand   pval  height  \
+2    II  7396863  7396905             2  WBGene00015567      +  0.849       2   
+4    II  7397278  7397311             7  WBGene00015567      +  0.000       7   
+6     I  5866649  5866700             5  WBGene00018007      -  0.000       5   
+
+      padj past_fdr  
+2  0.96645    False  
+4  0.00000     True  
+6  0.00000     True  
+*******
+Finding clusters in /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_TTAA.bed
+
+    Genes: 547
+    Reads: 790
+    Mean reads per gene: 1.44424131627
+    Median reads per gene: 1.0
+    Highest number per gene: 19
+    Lowest number per gene: 1
+    
+Example of cluster calls for /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_TTAA.bed:
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0   III  13464502  13464530             2  WBGene00006439      +  0.037   
+1     V  16341811  16341856             3  WBGene00014408      +  0.608   
+2   III   2032935   2032977             4  WBGene00023109      -  0.286   
+
+   height      padj past_fdr  
+0       2  0.106889    False  
+1       3  0.718545    False  
+2       4  0.381333    False  
+*******
+Finding clusters in /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_CCGG.bed
+
+    Genes: 269
+    Reads: 343
+    Mean reads per gene: 1.2750929368
+    Median reads per gene: 1.0
+    Highest number per gene: 15
+    Lowest number per gene: 1
+    
+Example of cluster calls for /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_CCGG.bed:
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0     V   6401429   6401458             2  WBGene00019017      -  0.008   
+1   III   6176339   6176375             2  WBGene00018342      -  0.116   
+2     V  16341811  16341854             2  WBGene00014408      +  0.824   
+
+   height      padj past_fdr  
+0       2  0.037333    False  
+1       2  0.162400    False  
+2       2  0.824000    False  
+*******
+Finding clusters in /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_TTGT.bed
+
+    Genes: 2607
+    Reads: 5849
+    Mean reads per gene: 2.24357499041
+    Median reads per gene: 1.0
+    Highest number per gene: 34
+    Lowest number per gene: 1
+    
+Example of cluster calls for /groups/Kimble/Common/fog_iCLIP/bed_collapsed//control_TTGT.bed:
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0    II  14006538  14006571             2  WBGene00008496      +  0.040   
+1    IV    658200    658230             2  WBGene00023106      +  0.565   
+2   III   2032939   2032981             7  WBGene00023109      -  0.034   
+
+   height      padj past_fdr  
+0       2  0.105505    False  
+1       2  0.682285    False  
+2       7  0.095833    False  
+*******
+Finding clusters in /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_CGGA.bed
+
+    Genes: 4057
+    Reads: 15044
+    Mean reads per gene: 3.70815873798
+    Median reads per gene: 2.0
+    Highest number per gene: 63
+    Lowest number per gene: 1
+    
+Example of cluster calls for /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_CGGA.bed:
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0    II   7396863   7396905             3  WBGene00015567      +  0.011   
+2    II   7397283   7397310             2  WBGene00015567      +  0.360   
+4     V  11602203  11602244             2  WBGene00009388      +  0.143   
+
+   height      padj past_fdr  
+0       3  0.031092    False  
+2       2  0.479256    False  
+4       2  0.229091    False  
+*******
+Finding clusters in /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_GGTT.bed
+
+    Genes: 4447
+    Reads: 16860
+    Mean reads per gene: 3.79131999101
+    Median reads per gene: 2.0
+    Highest number per gene: 72
+    Lowest number per gene: 1
+    
+Example of cluster calls for /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_GGTT.bed:
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+2    II   7397283   7397310             2  WBGene00015567      +  0.171   
+4    IV  14658005  14658046             7  WBGene00013323      +  0.000   
+5    IV  14658072  14658103             3  WBGene00013323      +  0.318   
+
+   height      padj past_fdr  
+2       2  0.264014    False  
+4       7  0.000000     True  
+5       3  0.432146    False  
+*******
+Finding clusters in /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_TGGC.bed
+
+    Genes: 6875
+    Reads: 43526
+    Mean reads per gene: 6.33105454545
+    Median reads per gene: 3.0
+    Highest number per gene: 136
+    Lowest number per gene: 1
+    
+Example of cluster calls for /groups/Kimble/Common/fog_iCLIP/bed_collapsed//fog_TGGC.bed:
+  chrom     left    right  max_coverage         gene_id strand   pval  height  \
+1    II  8067962  8067994             2  WBGene00011510      +  0.124       2   
+3    II  8068124  8068151             2  WBGene00011511      -  0.177       2   
+4    II  8068163  8068186             2  WBGene00011511      -  0.177       2   
+
+       padj past_fdr  
+1  0.221192    False  
+3  0.295477    False  
+4  0.295477    False  
+cluster_combine.run() combining clusters from files:
+['/groups/Kimble/Common/fog_iCLIP/clusters//control_TTAA.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//control_TTGT.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//control_CCGG.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//control_AATA.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//fog_GGTT.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//fog_CGGA.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//fog_TGGC.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//fog_GGCA.txt']
+['/groups/Kimble/Common/fog_iCLIP/clusters//fog_GGTT.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//fog_CGGA.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//fog_TGGC.txt', '/groups/Kimble/Common/fog_iCLIP/clusters//fog_GGCA.txt']
+*******
+0.01
+2
+/groups/Kimble/Common/fog_iCLIP/clusters//fog_GGTT.txt
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0    II   7397283   7397310             2  WBGene00015567      +  0.171   
+1    IV  14658005  14658046             7  WBGene00013323      +  0.000   
+2    IV  14658072  14658103             3  WBGene00013323      +  0.318   
+3     V  11602203  11602245             3  WBGene00009388      +  0.053   
+4   III  10612900  10612934             5  WBGene00012644      +  0.000   
+
+  past_fdr      padj  height  
+0    False  0.264014       2  
+1     True  0.000000       7  
+2    False  0.432146       3  
+3    False  0.107520       3  
+4     True  0.000000       5  
+2688
+760
+finally
+760
+/groups/Kimble/Common/fog_iCLIP/clusters//fog_CGGA.txt
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0    II   7396863   7396905             3  WBGene00015567      +  0.011   
+1    II   7397283   7397310             2  WBGene00015567      +  0.360   
+2     V  11602203  11602244             2  WBGene00009388      +  0.143   
+3   III  10617987  10618025             2  WBGene00012646      -  0.075   
+4   III  10612717  10612742             2  WBGene00012644      +  0.708   
+
+  past_fdr      padj  height  
+0    False  0.031092       3  
+1    False  0.479256       2  
+2    False  0.229091       2  
+3    False  0.141667       2  
+4    False  0.836502       2  
+2363
+671
+finally
+671
+/groups/Kimble/Common/fog_iCLIP/clusters//fog_TGGC.txt
+  chrom     left    right  max_coverage         gene_id strand   pval  \
+0    II  8067962  8067994             2  WBGene00011510      +  0.124   
+1    II  8068124  8068151             2  WBGene00011511      -  0.177   
+2    II  8068163  8068186             2  WBGene00011511      -  0.177   
+3     X  9964353  9964387             2  WBGene00013919      +  0.013   
+4    II  4325952  4325989             3  WBGene00003390      +  0.000   
+
+  past_fdr      padj  height  
+0    False  0.221192       2  
+1    False  0.295477       2  
+2    False  0.295477       2  
+3    False  0.034381       2  
+4     True  0.000000       3  
+6609
+2095
+finally
+2095
+/groups/Kimble/Common/fog_iCLIP/clusters//fog_GGCA.txt
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0    II   7396863   7396905             2  WBGene00015567      +  0.849   
+1    II   7397278   7397311             7  WBGene00015567      +  0.000   
+2     I   5866649   5866700             5  WBGene00018007      -  0.000   
+3     V  11602009  11602051             2  WBGene00009388      +  0.286   
+4     V  11602207  11602242             2  WBGene00009388      +  0.286   
+
+  past_fdr      padj  height  
+0    False  0.966450       2  
+1     True  0.000000       7  
+2     True  0.000000       5  
+3    False  0.404475       2  
+4    False  0.404475       2  
+3851
+1175
+finally
+1175
+[[10877563, 10877670, 5, 3.0, 0]]
+[[16380681, 16380709, 1, 1.0, 0], [16380783, 16380825, 3, 3.0, 0], [16380829, 16380947, 6, 4.0, 0]]
+[[6947065, 6947271, 8, 4.0, 0]]
+[[9630357, 9630460, 6, 4.0, 0]]
+[[12060380, 12060445, 1, 1.0, 0], [12060526, 12060643, 6, 4.0, 0], [12060707, 12060837, 4, 4.0, 0]]
+[[12692237, 12692344, 5, 4.0, 0], [12703778, 12703820, 2, 2.0, 0]]
+[[9399704, 9399822, 7, 4.0, 0]]
+[[2314691, 2314781, 6, 4.0, 0], [2315944, 2315988, 2, 2.0, 0]]
+[[12374269, 12374480, 8, 4.0, 0]]
+[[5230377, 5230483, 5, 4.0, 0]]
+[[12654502, 12654573, 5, 4.0, 0]]
+[[5321376, 5321530, 8, 4.0, 0]]
+[[318673, 318796, 6, 4.0, 0]]
+[[6374045, 6374089, 1, 1.0, 0], [6374223, 6374254, 1, 1.0, 0], [6374262, 6374332, 7, 4.0, 0]]
+[[6361477, 6361603, 5, 4.0, 0]]
+[[9757342, 9757455, 7, 4.0, 0]]
+[[9902278, 9902402, 7, 4.0, 0]]
+[[6592769, 6592819, 2, 2.0, 0], [6592907, 6593024, 7, 4.0, 0], [6593081, 6593115, 1, 1.0, 0]]
+[[13464290, 13464545, 7, 4.0, 0], [13464610, 13464649, 2, 2.0, 0]]
+[[6435689, 6435877, 6, 4.0, 0], [6436138, 6436186, 3, 3.0, 0]]
+[[6704001, 6704144, 5, 4.0, 0]]
+[[4659455, 4659527, 2, 2.0, 0], [4659625, 4659670, 1, 1.0, 0], [4659714, 4659775, 1, 1.0, 0], [4659837, 4659979, 6, 4.0, 0], [4659995, 4660072, 1, 1.0, 0]]
+[[5008952, 5009049, 4, 4.0, 0], [5009347, 5009393, 2, 2.0, 0], [5009482, 5009534, 1, 1.0, 0], [5009538, 5009596, 2, 2.0, 0], [5009771, 5009868, 5, 4.0, 0]]
+[[6094049, 6094144, 5, 4.0, 0], [6094311, 6094370, 2, 2.0, 0]]
+[[6246090, 6246282, 5, 4.0, 0]]
+[[11578410, 11578508, 6, 4.0, 0]]
+[[3159495, 3159550, 2, 2.0, 0], [3159558, 3159686, 5, 3.0, 0]]
+TO DO: ADD GET_COUNTS_PER_GENE FUNCTION TO CLUSTER_COMBINE
+====================
+     chrom      left     right  max_coverage         gene_id strand  pval  \
+0        I   5866649   5866700             2  WBGene00018007      -     0   
+1       II   7397275   7397311             2  WBGene00015567      +     0   
+2        I  14778228  14778283             2  WBGene00006349      -     0   
+3      III  13464290  13464545             7  WBGene00006439      +     0   
+4      III  13464610  13464649             2  WBGene00006439      +     0   
+5        I   1841431   1841493             3  WBGene00001196      +     0   
+6       IV   7961907   7961941             2  WBGene00017641      +     0   
+7       II   5379538   5379574             2  WBGene00006434      +     0   
+8      III    783035    783087             4  WBGene00018364      -     0   
+9      III  10612882  10612948             4  WBGene00012644      +     0   
+10     III  11306806  11306873             4  WBGene00004284      -     0   
+11     III  10596727  10596780             2  WBGene00012641      -     0   
+12       I   5868713   5868763             2  WBGene00018008      -     0   
+13       I    412496    412535             2  WBGene00021733      +     0   
+14       V   4824528   4824574             3  WBGene00002010      -     0   
+15       V   1875278   1875304             2  WBGene00020391      +     0   
+16     III  12399262  12399323             3  WBGene00013034      -     0   
+17     III   8693340   8693375             2  WBGene00015126      +     0   
+18     III   5029599   5029635             3  WBGene00020092      +     0   
+19     III   9046202   9046273             4  WBGene00011299      -     0   
+20     III   5249141   5249185             2  WBGene00016409      -     0   
+21     III   5249190   5249220             2  WBGene00016409      -     0   
+22      II   6847453   6847510             3  WBGene00001194      +     0   
+23      II   6847557   6847620             4  WBGene00001194      +     0   
+24      II   6847689   6847768             2  WBGene00001194      +     0   
+25       I  13168937  13168991             3  WBGene00009065      +     0   
+26      II  10882478  10882511             3  WBGene00009701      -     0   
+27       I   2009926   2009954             2  WBGene00021238      -     0   
+28       V  13411626  13411665             2  WBGene00009982      +     0   
+29       I   8610827   8610867             2  WBGene00009665      +     0   
+...    ...       ...       ...           ...             ...    ...   ...   
+1160    II   9886647   9886704             4  WBGene00007463      -     0   
+1161    IV  17285895  17285943             3  WBGene00044067      -     0   
+1162     I   9982483   9982526             2  WBGene00006379      -     0   
+1163    II   8812078   8812109             2  WBGene00009783      +     0   
+1164     I   7301127   7301169             2  WBGene00008765      -     0   
+1165     I   7300134   7300182             2  WBGene00008764      -     0   
+1166     I   7300244   7300280             2  WBGene00008764      -     0   
+1167     I   6053988   6054031             2  WBGene00016156      -     0   
+1168    II  10179808  10179858             3  WBGene00009365      +     0   
+1169     I   3001381   3001415             3  WBGene00021839      -     0   
+1170    IV    294649    294687             3  WBGene00019298      -     0   
+1171   III   8994769   8994829             4  WBGene00010307      -     0   
+1172   III   8994899   8994950             2  WBGene00010307      -     0   
+1173     I  13353125  13353188             3  WBGene00012734      +     0   
+1174   III  10746774  10746899             4  WBGene00004302      -     0   
+1175    II  11731052  11731098             3  WBGene00000114      +     0   
+1176    II  11731157  11731198             3  WBGene00000114      +     0   
+1177   III   5859123   5859168             2  WBGene00000115      +     0   
+1178    IV   8916804   8916865             4  WBGene00004307      -     0   
+1179     I  13297074  13297155             2  WBGene00006595      +     0   
+1180    IV   4386367   4386396             3  WBGene00018898      +     0   
+1181     V   1495665   1495715             2  WBGene00016512      +     0   
+1182     I   9796222   9796255             3  WBGene00009164      +     0   
+1183     I   9796566   9796606             2  WBGene00009164      +     0   
+1184   III   5187898   5188071             3  WBGene00019628      +     0   
+1185   III   5188131   5188184             2  WBGene00019628      +     0   
+1186   III   5188363   5188399             2  WBGene00019628      +     0   
+1187    II  12037215  12037274             2  WBGene00006601      -     0   
+1188     I   6558447   6558511             3  WBGene00006607      +     0   
+1189    II   6955449   6955547             3  WBGene00006605      -     0   
+
+      height  
+0          2  
+1          2  
+2          2  
+3          4  
+4          2  
+5          3  
+6          2  
+7          2  
+8          4  
+9          4  
+10         4  
+11         2  
+12         2  
+13         2  
+14         3  
+15         2  
+16         3  
+17         2  
+18         3  
+19         4  
+20         2  
+21         2  
+22         3  
+23         4  
+24         2  
+25         3  
+26         3  
+27         2  
+28         2  
+29         2  
+...      ...  
+1160       4  
+1161       3  
+1162       2  
+1163       2  
+1164       2  
+1165       2  
+1166       2  
+1167       2  
+1168       3  
+1169       3  
+1170       3  
+1171       4  
+1172       2  
+1173       3  
+1174       4  
+1175       3  
+1176       3  
+1177       2  
+1178       4  
+1179       2  
+1180       3  
+1181       2  
+1182       3  
+1183       2  
+1184       3  
+1185       2  
+1186       2  
+1187       2  
+1188       3  
+1189       3  
+
+[1190 rows x 8 columns]
+max coverage < 2: 0
+Peaks: 1190. Genes: 994.
+0.01
+2
+/groups/Kimble/Common/fog_iCLIP/clusters//control_TTAA.txt
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0   III  13464502  13464530             2  WBGene00006439      +  0.037   
+1     V  16341811  16341856             3  WBGene00014408      +  0.608   
+2   III   2032935   2032977             4  WBGene00023109      -  0.286   
+3     V   6099896   6099930             2  WBGene00000802      -  0.116   
+4     I   6497437   6497483             2  WBGene00016943      +  0.041   
+
+  past_fdr      padj  height  
+0    False  0.106889       2  
+1    False  0.718545       3  
+2    False  0.381333       4  
+3    False  0.194581       2  
+4    False  0.112211       2  
+52
+5
+finally
+5
+/groups/Kimble/Common/fog_iCLIP/clusters//control_TTGT.txt
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0    II  14006538  14006571             2  WBGene00008496      +  0.040   
+1    IV    658200    658230             2  WBGene00023106      +  0.565   
+2   III   2032939   2032981             7  WBGene00023109      -  0.034   
+3     V   5576220   5576251             2  WBGene00219824      +  0.741   
+4    II  10857848  10857877             2  WBGene00010911      -  0.024   
+
+  past_fdr      padj  height  
+0    False  0.105505       2  
+1    False  0.682285       2  
+2    False  0.095833       7  
+3    False  0.847129       2  
+4    False  0.080233       2  
+575
+89
+finally
+89
+/groups/Kimble/Common/fog_iCLIP/clusters//control_CCGG.txt
+   chrom      left     right  max_coverage         gene_id strand   pval  \
+0      V   6401429   6401458             2  WBGene00019017      -  0.008   
+1    III   6176339   6176375             2  WBGene00018342      -  0.116   
+2      V  16341811  16341854             2  WBGene00014408      +  0.824   
+3  MtDNA      5455      5487             2  WBGene00000829      +  0.060   
+4      X  14477242  14477275             2  WBGene00045371      +  0.632   
+
+  past_fdr      padj  height  
+0    False  0.037333       2  
+1    False  0.162400       2  
+2    False  0.824000       2  
+3    False  0.113750       2  
+4    False  0.680615       2  
+14
+2
+finally
+2
+/groups/Kimble/Common/fog_iCLIP/clusters//control_AATA.txt
+  chrom      left     right  max_coverage         gene_id strand   pval  \
+0   III  13464492  13464534             2  WBGene00006439      +  0.268   
+1     V  16341811  16341854             2  WBGene00014408      +  0.793   
+2   III   2032939   2032971             2  WBGene00023109      -  0.677   
+3     I   8612815   8612838             2  WBGene00009666      -  0.029   
+4     V   6099896   6099936             2  WBGene00000802      -  0.225   
+
+  past_fdr      padj  height  
+0    False  0.364656       2  
+1    False  0.833152       2  
+2    False  0.769740       2  
+3    False  0.109409       2  
+4    False  0.352358       2  
+83
+4
+finally
+4
+TO DO: ADD GET_COUNTS_PER_GENE FUNCTION TO CLUSTER_COMBINE
+max coverage < 2: 0
+Peaks: 6. Genes: 6.
+Successfully finished.

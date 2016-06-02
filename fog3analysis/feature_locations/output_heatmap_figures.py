@@ -162,6 +162,7 @@ def smooth_line(x, y):
 def build_heatmap_from_arrays(
         image, image_peaks, output_filename='figs/heatmap.pdf',
         set_scale_from_data=True, include_edge_line=True):
+    _xlim = 5e3  # x axis has the maximum of _xlim
     print "output_heatmap_figures()"
     original_filename = output_filename
     border_pos = []
@@ -198,16 +199,30 @@ def build_heatmap_from_arrays(
             edge_x.append(len(
                 [x for x in row if isinstance(x, np.ma.core.MaskedConstant)])
             )
+    trunc_image_peaks, trunc_edge_x = ([], [])
+    if aligned_on == 'middle':
+        trunc_image_peaks = image_peaks
+        trunc_edge_x = edge_x
+    else:
+        for i in range(len(image_peaks)):
+            if edge_x[i] <= _xlim:
+                trunc_image_peaks.append(image_peaks[i])
+                trunc_edge_x.append(edge_x[i])
     if aligned_on != 'middle':
         unmasked_x_border, unmasked_y_border = smooth_line(
-            np.array(edge_x), np.array(range(0, len(edge_x)))
+            np.array(trunc_edge_x), np.array(range(0, len(trunc_edge_x)))
         )
     # if np.image_peaks[0][0]
     # for row in image_peaks:
     #     for pos in row:
     #         np.isfinite()
-    for n, row in enumerate(image_peaks):
-        image_peaks[n] = np.ma.masked_where(row <= 0.001, row, copy=True)
+    def _zero(x):
+        if x <= 0.01: return 0
+        else: return x
+    for n, row in enumerate(trunc_image_peaks):
+        trunc_image_peaks[n] = np.ma.masked_where(row <= 0.001, row, copy=True)
+        trunc_image_peaks[n] = [_zero(q) for q in trunc_image_peaks[n]]
+    trunc_image_peaks = np.array(trunc_image_peaks)
     for color in ['Reds', 'Spectral', 'coolwarm']:
         output_filename = original_filename.partition('.pdf')[0] + '_%s.pdf' % color
         plt.clf()
@@ -215,20 +230,20 @@ def build_heatmap_from_arrays(
         fig, ax1 = plt.subplots()
         palette = plt.cm.get_cmap(color)
         palette.set_bad('white')
-        vmin = np.nanmin(image_peaks)
+        vmin = 0.01  #np.nanmin(image_peaks)
         vmax = np.nanmax(image_peaks)
         cax = ax1.imshow(
-            image_peaks, cmap=palette, #aspect='auto',
+            trunc_image_peaks, cmap=palette, #aspect='auto',
             norm=matplotlib.colors.Normalize(
                 vmin=vmin, vmax=vmax, clip=False),
             interpolation='nearest', alpha=0.8)
         if include_edge_line and (aligned_on != 'middle'):
             plt.plot(unmasked_x_border, unmasked_y_border, 'k--')
         plt.xlim([
-            0, min([len(image_peaks[0]), 5e3])
+            0, min([len(trunc_image_peaks[0]), _xlim])
         ])
         plt.ylim([
-            0, min([len(image_peaks), 5e3])
+            0, min([len(trunc_image_peaks), 5e3])
         ])
         plt.gca().invert_yaxis()
         #cbar = fig.colorbar(cax, ticks=[vmin, vmax], orientation='horizontal')

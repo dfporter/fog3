@@ -106,15 +106,29 @@ def get_limits(x, y):
     d = np.nanmax(y)
     return [a, b, c, d]
 
+def add_locations(pk):
+    import load_bedgraph
+    ga = load_bedgraph.load_bedgraph('bedgraph_unnorm/all_exp.wig')
+    gtf = pandas.read_csv('/opt/lib/gtf_with_names_column.txt',
+                          index_col=False, sep='\t').to_dict('records')
+    gtf_d = collections.defaultdict(list)
+    for row in gtf: gtf_d[row['gene_name']].append(row)
+    pk.add_location_from_integral(gtf_d, ga)
+    return pk
     
 if __name__ == '__main__':
     indir = sys.argv[1]
-    for fname in glob.glob(indir + '/*exp*txt'):
+    for fname in glob.glob(indir + '/*txt'):
         pk = peaksList(name='FOG-3')
         pk.read_csv(fname)
+        if re.search('exp', os.path.basename(fname)):
+            add_locations(pk) 
+        pk.add_gene_name('/opt/lib/gtf_with_names_column.txt')
+        pk.add_biotype('/opt/lib/gtf_with_names_column.txt')
         print pk
         pk.read_sp_vs_oo()
         pk.annotate_sp_vs_oo()
         pk.read_sp_vs_oo_as_programs()
+        pk.to_csv(fname)
         print pk
         cor_with_abundance(pk.df)

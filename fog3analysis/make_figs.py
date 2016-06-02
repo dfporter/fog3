@@ -1,4 +1,5 @@
 '''
+
 Do all analysis on FOG-3 iCLIP.
 Input:
 permutation_peaks/ folder of peaks files.
@@ -22,6 +23,7 @@ import scipy.stats as scs
 from peaksList import *
 import load_bedgraph
 
+
 def load_peaks(infile):
     pk = peaksList(name='name')
     pk.read_csv(infile)
@@ -44,6 +46,7 @@ def add_locations(pk_list):
         pk.add_location_from_integral(gtf_d, ga)
     return pk_list
 
+
 def make_pie_biotype(pk, fname='figs/biotype_pie.pdf', simplify=False):
     biotypes = dict(pk.df['biotype'].value_counts())
     if simplify:
@@ -58,9 +61,13 @@ def make_pie_biotype(pk, fname='figs/biotype_pie.pdf', simplify=False):
 
 def make_pie_gender(pk, fname='figs/gender_pie.pdf'):
     programs = dict(pk.df['Program'].value_counts())
+    print programs.keys()
+    del programs['']
     make_pie_from_dict(programs, fname)
-
-
+    noble_programs = {
+        'Oogenic': 65.33, 'Spermatogenic': 22.33, 
+        'Oogenic and spermatogenic': 12.33 }
+    make_pie_from_dict(noble_programs, 'figs/noble_fog3_gender_pie.pdf')
 def make_pie_location(pk, fname='figs/location_pie.pdf'):
     locs = dict(pk.df['location'].value_counts())
     if 'ncRNA' in locs: del locs['ncRNA']
@@ -165,6 +172,13 @@ if __name__ == '__main__':
                     + '/feature_locations/')
     import config
     lib = config.config(args.config_ini)
+    if os.path.isfile(args.input):
+        print "--input was a file, please enter a directory."
+        sys.exit()
+    # Number of clusters
+    cmd = 'python fog3analysis/feature_locations/number_of_clusters.py'
+    cmd += ' -i {0}/combined_exp.txt -c {1}'.format(args.input, args.config_ini)
+    #os.system(cmd)
     ##################
     # Make line graph (Fig 1C).
     # Used by determine_feature_locations:
@@ -176,10 +190,11 @@ if __name__ == '__main__':
     import determine_feature_locations
     import peak_in_gene_line_plot
     import build_image_objects_for_heatmaps
+#    skip = '''
     (peaks, txpts, chr_lens) = determine_feature_locations.get_data(
         args, lib=lib)
-#    build_image_objects_for_heatmaps.heatmap_of_raw_signal(
-#        peaks, txpts, output_dirname='figs/Fig1E_raw_signal_heatmap.pdf')
+    build_image_objects_for_heatmaps.heatmap_of_raw_signal(
+        peaks, txpts, output_dirname='figs/Fig1E_raw_signal_heatmap.pdf')
     peak_in_gene_line_plot.normalize_distances(txpts)
     (ave_peaks, ave_fbes, ave_negs, ave_polyA, ave_peak_v_polyA,
      ave_fbe_v_polyA, ave_highest_peak, ave_secondary_peaks
@@ -190,13 +205,14 @@ if __name__ == '__main__':
        output_filename='figs/Fig1Cmaybe_features_in_normalized_gene.pdf')
         #determine_feature_locations.make_figs(
         #    peaks, txpts, chr_lens, args, hold_original)
-    sys.exit()
-    args.input = hold_original
+    args.input = hold_original#'''
     ##################
     cims_file = 'tables/cims_annotated.txt'
     pk_cims = load_peaks(cims_file)
-    #if os.path.isdirectory(args.input):
-    pk_pos = load_peaks(os.path.join(args.input, 'combined_exp.txt'))
+    if os.path.isdir(args.input):
+        peaks_fname = os.path.join(args.input, 'combined_exp.txt')
+    else: peaks_fname = args.input
+    pk_pos = load_peaks(peaks_fname)
 #        pk_neg = load_peaks(os.path.join(args.input, 'combined_control.txt'))
     #pk.add_permutation_peaks(clip_fname)
     pk_cims = add_locations([pk_cims])[0]

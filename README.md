@@ -132,6 +132,11 @@ lib['bedgraphs_folder'], which will be the unnormalized bedgraphs.
 The added values will represent the max depth in the peak region in
 absolute read number.
 
+Reads can be annotated then by:
+```bash
+python fog3analysis/annotate.py permutation_peaks/
+```
+
 ```AsciiDoc
 Reads were assigned to genes using HTSeq [x2].
 Overlapping reads were defined as clusters. All reads within a
@@ -221,7 +226,7 @@ python fog3analysis/make_figs.py \
 From text
 ----
 
-After normalization to a negative control (see Methods),
+After normalization to a negative control (see Methods), 
 most of the enriched sequences were from mRNAs (Fig 4A.)
 
 ```bash
@@ -279,7 +284,7 @@ python fog3analysis/feature_locations/determine_feature_locations_ui.py \
        -c auto.ini -i permutation_peaks/combined_exp.txt
 ```
 
-Furthermore,326/605 [larger list: 983/1388] mRNAs had two or more sequence
+Furthermore, 326/605 [larger list: 983/1388] mRNAs had two or more sequence
 peaks spreading across the 3’UTR (Fig 4F, Supp Fig 5I-J). 
 
 This binding pattern was reminiscent of other non-specific RNA binding
@@ -411,3 +416,4 @@ mkdir figs/permutation_peaks
 python ../fog3analysis/feature_locations/determine_feature_locations_ui.py -c auto.ini -i permutation_peaks/combined_exp.txt 
 
 ```
+

@@ -276,8 +276,8 @@ def make_figs(peaks, txpts, chr_lens, args, input_dir, lib=None):
     #peak_in_gene_line_plot.peak_vs_fbe(txpts)
     #logger.info('%s: Features in normalized gene line plot.' % (
     #    datetime.datetime.now().strftime('%Hh%Mm')))
-    heatmap_of_raw_signal(peaks, txpts, output_dirname=output_dirname,
-                          include_motif=True)
+    #heatmap_of_raw_signal(peaks, txpts, output_dirname=output_dirname,
+    #                      include_motif=True)
     peak_in_gene_line_plot.plot_features(
        (ave_peaks, ave_fbes, ave_negs, ave_polyA, ave_highest_peak, ave_secondary_peaks),
        output_filename='figs/%s/features_in_normalized_gene.pdf' % os.path.dirname(input_dir))
