@@ -3,10 +3,11 @@ FOG-3 iCLIP analysis
 
 Pre-processing
 ----
-The initial fastq zip file and the result of splitting by barcode are not included in the repository, but are currently in pre_calls/fastq/.
+The initial fastq zip file and the result of splitting by barcode are not included in the repository.
 
-Processing from fastq to uncollapsed bed is done with clip-preprocess, followed by collapsing reads (handled with the output from write_commands_for_collapsing.py in order to use multiple CPUs).
-Bedgraphs are then made by running bed_to_wig.py, which also makes the normalized bedgraphs (coverage per million reads).
+Processing from fastq to uncollapsed bed was done with clip-preprocess, followed by collapsing reads (handled with the output from write_commands_for_collapsing.py in order to use multiple CPUs).
+
+Bedgraphs were then made by running bed_to_wig.py, which also made the normalized bedgraphs (coverage per million reads).
 
 Scripts are in analysis/.
 Most output is in peaks-by-permutations/.
@@ -14,12 +15,16 @@ Most output is in peaks-by-permutations/.
 
 ```bash
 python split_fastq_to_bed.py
-# Split rRNA reads.
+
 python write_commands_for_collapsing.py
+
 # Ran these commands.
+
 # Make bedgraphs.
 python bed_to_wig.py
+
 # Edit .ini files.
+
 # Call peaks.
 python peaks-by-permutations.py
 ```
@@ -46,10 +51,14 @@ local_paths={
      'sjdb': '/opt/lib/sjdb.txt'}
 
 def call_star(args, paths=None):
+
     in_dir = args.input_dir
+
     for fastq_filename in glob.glob(in_dir + '/*.fastq'):
+
         print fastq_filename
         bname = os.path.basename(fastq_filename).partition('.fastq')[0]
+
         # CSEQ parameters. http://psb.stanford.edu/psb-online/proceedings/psb16/kassuhn.pdf
         # Defaults changed:
         # --outFilterMultimapScoreRange is default 1
@@ -67,18 +76,25 @@ STAR --alignIntronMax 1 --sjdbGTFfile {sjdb} \
 --alignTranscriptsPerReadNmax 100000
 '''.format(sjdb=paths['sjdb'],
         indexes=paths['indexes'], rin=fastq_filename, prefix=bname + '_')
+
 ```
 
 Here's where unique/multimapping reads are split:
 
 ```python
         with open('{d}/{a}'.format(d=unique_dir, a=os.path.basename(sam)), 'w') as uniquef:
+
             unique = get_lines_with_mapq_val(samn=sam, mapq='255')
+
             uniquef.write(unique)
+
             with open('{d}/{a}'.format(d=multi_dir, a=os.path.basename(sam)), 'w') as multif:
                 multif.write(unique)
+
         with open('{d}/{a}'.format(d=multi_dir, a=os.path.basename(sam)), 'a') as multif:
+
             multi = get_lines_with_mapq_val(samn=sam, mapq='3', include_header=False)
+
             multif.write(multi)
 ```
 
@@ -86,24 +102,34 @@ And here's the filtering out of < 20 quality reads.
 ```python
 
     for sam in glob.glob('uniquely_mapping/*.sam'):
+
         header = ''
         outli = ''
+
         for li in open(sam).readlines():
+
             if li[0] == '@':
                 header += li
                 continue
+
             s = li.rstrip('\n').split('\t')
             as_flag = re.match('.*AS:i:(\d+).*', str(s[11:]))
+
             if as_flag is not None:
                 as_value = int(as_flag.group(1))
             else:
                 print "No AS value?"
-            if as_value < 20: continue
+
+            if as_value < 20:
+                continue
+
             outli += li
-        open('uniquely_mapping_20_AS/{a}'.format(a=os.path.basename(sam)), 'w').write(header + outli)
+
+        open('uniquely_mapping_20_AS/{0}'.format(
+            os.path.basename(sam)), 'w').write(header + outli)
 ```
 
-We will keep track of where the reads have gone in tables/read_stats.xls.
+We kept track of reads in tables/read_stats.xls.
 
 |    Folder     | Description |
 |    ------     | ----------- |
@@ -159,58 +185,9 @@ python stats/peaks_file.py -i permutation_peaks
 $ python stats/peaks_file.py -i permutation_peaks -c tables/cims_annotated.txt
 ```
 
-Figure text
+Figures
 ----
 
-These figure captions are from the docx, and differ from the
-pdf figures (Email Jan 14, or pdf in my folder modified Jan 14) we have.
-The docx is older (Dec 16), so we will edit the pdfs.
-
-Here are the captions from the docx:
-
- (A) FOG-3 binds primarily to mRNAs.
- iCLIP of FOG-3 crosslinked RNAs enriches for messenger RNAs.
-
- (B) mRNAs bound to FOG-3 are associated with mitosis and oogenesis.
- We observed a similar result with microarrays but saw further enrichment
- with iCLIP. See text and Supp Fig 5 for further explanation.
-
- (C) Distribution of binding sites within FOG-3 mRNAs.
- Transcripts arranged by predicted nucleotide (nt) length,
- from 5’ to 3’ UTR. Dotted line shows the end of the transcript.
- Binding sites represented by a heat map, from no signal (white) to
- strong signal (red). Note the prevalence of binding sites at the ends
- of transcripts.
-
- (D) Distribution of binding sites within mRNAs. Most
- of the binding sites are found the 3’ UTR.
-
- (E-F) Binding sites are found
- throughout the 3’UTR. Transcripts arranged by predicted 3’UTR nucleotide
- (nt) length, from coding region to transcript end. Transcript end and binding
- sites again represented with a dotted line and a heat map, as in C.
- The top enriched mRNA targets contain multiple binding sites covering
- their 3’, as depicted by the peak representations in F.
-
- (G) Model of FOG-3 assembly and function. FOG-3 forms a helical polymer
- and binds across the 3’UTRs of target mRNA transcripts. This leads to
- repression of mRNAs associated with the oogenic program, promoting sperm
- specification. FOG-3 may target specific mRNAs through another RNA binding
- protein that functions as a seed. Further discussion in the main text.
-
-And here are the PDF figures:
-
-4A. Line graph of location.
-4B. Pie chart of location.
-4C. Zoom in on UTR in 5A (Will not be included).
-4D. Histogram of peaks per gene.
-4E. Example genes.
-
-
-S5E Table of statistics.
-S5F Overlap with RIP venn.
-S5G Gender pie.
-S5H MEME motif.
 
 ```bash
 python fog3analysis/make_figs.py \
@@ -219,86 +196,9 @@ python fog3analysis/make_figs.py \
 
 # S5E is made by stats/file_stats.py
 # 4D is made by number_of_clusters.py
-# Code for 4E is in subpeaks_ui.py, but needs work.
+# Code for 4E is in subpeaks_ui.py.
 # This leaves only S5H, which is not made by our scripts.
 ```
-
-From text
-----
-
-After normalization to a negative control (see Methods), 
-most of the enriched sequences were from mRNAs (Fig 4A.)
-
-```bash
-make_figs.py
-# Outputs to figs/location_*.pdf
-```
-
-Most of the 605  [larger list: 1388] FOG-3 mRNA targets are associated with
-oogenesis (Fig 4B), as previously observed in microarray studies (cit XXX). 
-
-```bash
-make_figs.py
-# Outputs to figs/gender_*.pdf
-``` 
-
-The iCLIP targets overlapped significantly with the microarray target list
-(Supp Fig 5F-G, p value < 10-208 [larger list, 10^-227]), but was even more
-depleted in genes associated with spermatogenesis
-(Supp Fig 5H, p value < 10-24 [larger list < 10^49]).
-
-```bash
-make_figs.py
-# Outputs to figs/*.pdf
-
-# This is not discarding ncRNA. Doing so increases significance
-# around 1e3 fold for both aligners.
-
-# novoalign
-Statistics for figs/overlap_with_rip_venn_clip.pdf overlap with RIP:
-Genome size 12839 (all germline RNAs).
-[[11220, 456], [952, 266]]
-(6.875, 1.2939754179801647e-96)
-Genome size 12839 (20k gene genome).
-[[18326.0, 456], [952, 266]]
-(11.229166666666666, 7.2166322496851259e-142)
-
-# star
-Statistics for figs/overlap_with_rip_venn_clip.pdf overlap with RIP:
-     [[(-R, -C), (+R, -C)],
-      [(-R, +C), (+R, +C)]]
-Genome size 12839 (all germline RNAs).
-[[11402, 492], [764, 230]]
-(6.9767058272676969, 4.4869857195357939e-87)
-Genome size 12839 (20k gene genome).
-[[18514.0, 492], [764, 230]]
-(11.328427616736901, 2.8738015736746662e-126)
-```
-
-A majority of the sequences mapped to the 3’ UTRs (Fig 4C-D),
-with an apparent preference for the beginning versus the end of the region
-(Fig 4E).
-
-```bash
-python fog3analysis/feature_locations/determine_feature_locations_ui.py \
-       -c auto.ini -i permutation_peaks/combined_exp.txt
-```
-
-Furthermore, 326/605 [larger list: 983/1388] mRNAs had two or more sequence
-peaks spreading across the 3’UTR (Fig 4F, Supp Fig 5I-J). 
-
-This binding pattern was reminiscent of other non-specific RNA binding
-proteins, like ataxin and HuR (XXX cit). 
-
-Few peaks were observed in the 5’ UTR and protein coding regions (Fig 4C-D),
-implying FOG-3 RNA binding was restricted to the 3’ region. 
-
-We did not observe a strong sequence preference in the identified peaks,
-but in a subset of the peaks we did see a preference for CU repeats,
-a UA rich motif and a CUCA motif (Supp Fig 5K-L). CU repeats may show be
-evidence for sequence preference by FOG-3 or bias for UV protein-RNA
-crosslinking (cit XXX).
-
 
 Mapping
 ----
@@ -326,38 +226,6 @@ python file_stats.py -i cims/ -b mapping/ -c ./
 dfporter at kimble-1 in /groups/Kimble/Common/fog_iCLIP/stats on master* b8caca3
 $ python file_stats.py -i ../cims -b ../../fbf_celltype/cims/ -o fog3_file_stats
 ```
-
-Gender analysis
-----
-
-Three ways to define gender:
-    
-    1. Use definitions from /opt/lib/ortiz/DESeq_genes_in_gonad.txt.
-    2. Use fold changes from /opt/lib/ortiz/DESeq_genes_in_gonad.txt.
-    3. Use the method from Noble et al.:
-        * Read programs from /opt/lib/ortiz/TableS1_oogenic.txt and /opt/lib/ortiz/TableS2_spermatogenic.txt
-        * Count oogenic as those only in oogenic dataset, ect.
-
-In the case of 3., these files have the format:
-    Wormbase ID	Ortiz Gonad	Sperm X	Maternal X	Oocyte X	Program
-WBGene00235362	Not Present	Not Present	Oogenic	Not Present	Oogenic only
-
-It seems quite clear that, on the whole, being a FOG-3 target does not
- correlate with SP/OO RPKM ratio - they are not enriched in either direction.
- In addition, SP/OO RPKM ratio does not correlate with FOG-3 peak height.
- Higher FOG-3 peaks are not more likely to be SP or OO enriched.
- Overall, the subset of SP or OO expressed RNAs that are FOG-3 targets
- is largely the set of RNAs that are abundant in both germlines.
-
-The next question is - how does this abundance bias affect the SP/OO
- program definitions of Noble et al.? To answer this, we have to ask
- IF we have the observed abundance bias, THEN how likely is a given
- category size to be observed? So we take the observed range of abundances,
- and fit a histogram along each axis.
-
-On a different note, we could take each gene's (x_sp, y_oo) coordinate,
- and rotate by 45 degrees.
-
 
 
 CIMS analysis
